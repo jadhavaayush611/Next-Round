@@ -1,0 +1,24 @@
+{
+  "name": "nextround-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "format:frontend": "npm --prefix frontend run format",
+    "format:backend": "black backend/app backend/tests && isort backend/app backend/tests",
+    "format": "npm run format:frontend && npm run format:backend",
+    
+    "lint:frontend": "npm --prefix frontend run lint",
+    "lint:backend": "ruff check backend/app backend/tests && mypy backend/app",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    
+    "check:frontend": "npm --prefix frontend run format:check && npm --prefix frontend run typecheck && npm --prefix frontend run lint",
+    "check:backend": "black --check backend/app backend/tests && isort --check-only backend/app backend/tests && ruff check backend/app backend/tests && mypy backend/app",
+    "check": "npm run check:frontend && npm run check:backend",
+    
+    "test:frontend": "npm --prefix frontend run typecheck",
+    "test:backend": "pytest backend/tests",
+    "test": "npm run test:backend && npm run test:frontend",
+    
+    "all": "npm run check && npm run test"
+  }
+}
