@@ -1,7 +1,9 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import String, Integer, Float, DateTime
+from datetime import UTC, datetime
+
+from sqlalchemy import DateTime, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.db.session import Base
 
 
@@ -20,5 +22,5 @@ class User(Base):
     cgpa: Mapped[float | None] = mapped_column(Float, nullable=True)
     target_role: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(UTC)
     )

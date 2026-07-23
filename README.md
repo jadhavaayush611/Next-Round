@@ -85,6 +85,80 @@ For a detailed look at system diagrams and parser designs, see [architecture.md]
 | **Phase 3** | Mentor & Dashboards | Placement Readiness metric, Timeline Roadmaps, Candidate tracking | Early August |
 | **Phase 4** | Advanced Integrations | Local LLMs (Ollama), DSA problem tracking, Mock interviews | Late August |
 
+## 🚀 Getting Started
+
+### Local Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/jadhavaayush611/Next-Round.git
+   cd Next-Round
+   ```
+
+2. **Configure Environment Variables**:
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+
+3. **Backend Virtual Environment & Dependencies**:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -r backend/requirements-dev.txt
+   ```
+
+4. **Frontend Setup**:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+---
+
+## 🐳 Docker Deployment
+
+### Local Development Environment
+Run full stack (FastAPI + Next.js + PostgreSQL) with live reloading:
+```bash
+docker compose up --build
+```
+
+### Production Deployment
+Run production stack with isolated database container:
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+---
+
+## 💻 Development Workflow
+
+The backend standardizes on modern Python tooling:
+* **Black**: Code formatting.
+* **Ruff**: Fast linting and import sorting (`I` rules, replacing standalone `isort`).
+* **Mypy**: Static type checking.
+* **Pytest**: Unit testing.
+
+### Standard Commands
+
+* **Install pre-commit hooks**:
+  ```bash
+  pre-commit install
+  ```
+* **Formatting**:
+  ```bash
+  make format
+  ```
+* **Verification**:
+  ```bash
+  make check
+  ```
+* **Testing**:
+  ```bash
+  make test
+  ```
+
 ---
 
 ## 🤝 Contribution Guidelines

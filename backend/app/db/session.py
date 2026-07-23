@@ -1,6 +1,8 @@
-from typing import Generator
+from collections.abc import Generator
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
 from app.config.settings import settings
 
 # Create engine with connection pooling parameters for production
@@ -19,7 +21,7 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_db() -> Generator:
+def get_db() -> Generator[Session, None, None]:
     """Dependency injection yield generator for database sessions."""
     db = SessionLocal()
     try:

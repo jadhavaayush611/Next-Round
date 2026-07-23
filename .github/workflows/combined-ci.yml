@@ -29,9 +29,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Format Checks
-        run: |
-          black --check app tests
-          isort --check-only app tests
+        run: black --check app tests
 
       - name: Lint Checks (Ruff)
         run: ruff check app tests

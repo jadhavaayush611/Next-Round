@@ -6,9 +6,8 @@ To maintain code readability and minimize regressions, all contributors must fol
 
 ## 1. Python (Backend) Rules
 
-* **Formatting**: Standardize layout files via `black` (88 character line limit).
-* **Import Sorting**: Organize packages via `isort` configured with the Black profile.
-* **Linting Checks**: Address warnings raised by `ruff`. Fix unused variables, missing statements, and syntax anomalies.
+* **Formatting**: Standardize Python files via `black` (88 character line limit).
+* **Linting & Import Sorting**: Code linting and import sorting are handled by `ruff` (with rules `E`, `F`, `I`, `N`, `UP`, `B`, `C4`). Standalone `isort` is no longer used; Ruff is responsible for import sorting via the `I` rules.
 * **Type Safety**: Apply type annotations to function parameters and return structures. All types are checked using `mypy --strict`.
 * **Docstring standard**: Apply Google-style docstrings to public services, helper endpoints, and repositories:
   ```python
@@ -68,6 +67,12 @@ We use semantic commit messages to format repository history:
 
 ## 4. Local Verification
 Run formatting and lint checks locally before opening a pull request:
+* **Makefile Workflow (Recommended)**:
+  ```bash
+  make format   # Formats code with black and ruff --fix
+  make check    # Runs black --check, ruff check, mypy, and pytest
+  make test     # Runs pytest suite
+  ```
 * **NPM Script**:
   ```bash
   npm run check

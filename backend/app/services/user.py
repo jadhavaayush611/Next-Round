@@ -1,10 +1,11 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from app.core.security import get_password_hash, verify_password, create_access_token
+
+from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
 from app.repositories.user import UserRepository
-from app.schemas.user import UserCreate
 from app.schemas.token import Token
-from fastapi import HTTPException, status
+from app.schemas.user import UserCreate
 
 
 class UserService:
@@ -34,7 +35,7 @@ class UserService:
         return self.user_repo.create(db_user)
 
     def authenticate_user(self, email: str, plain_password: str) -> Token:
-        """Authenticate a user using email and password, returning a JWT access token."""
+        """Authenticate user using email & password, returning a JWT access token."""
         user = self.user_repo.get_by_email(email)
         if not user or not verify_password(plain_password, user.hashed_password):
             raise HTTPException(

@@ -1,11 +1,13 @@
+from collections.abc import Generator
+
 import pytest
-from typing import Generator
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
 from app.db.session import Base, get_db
-from app.main import app
+from main import app
 
 # Using an in-memory SQLite database for fast, isolated unit testing
 SQLALCHEMY_DATABASE_URL = "sqlite://"

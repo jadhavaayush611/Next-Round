@@ -1,5 +1,5 @@
-from app.schemas.user import UserBase, UserCreate, UserUpdate, UserResponse
 from app.schemas.token import Token, TokenPayload
+from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
 
 __all__ = [
     "UserBase",
