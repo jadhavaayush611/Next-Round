@@ -8,7 +8,10 @@ from app.services.user import UserService
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new student account.
@@ -17,10 +20,10 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     user_service = UserService(db)
     return user_service.register_user(user_in)
 
+
 @router.post("/login", response_model=Token)
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     """
     Standard OAuth2 password flow login.

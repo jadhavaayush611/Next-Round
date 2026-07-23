@@ -13,9 +13,11 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # SQLAlchemy 2.0 Declarative base
 class Base(DeclarativeBase):
     pass
+
 
 def get_db() -> Generator:
     """Dependency injection yield generator for database sessions."""

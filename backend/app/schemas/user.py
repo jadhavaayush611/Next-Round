@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
+
 class UserBase(BaseModel):
     email: EmailStr
     name: str
@@ -11,8 +12,10 @@ class UserBase(BaseModel):
     cgpa: float | None = None
     target_role: str | None = None
 
+
 class UserCreate(UserBase):
     password: str
+
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
@@ -24,8 +27,9 @@ class UserUpdate(BaseModel):
     cgpa: float | None = None
     target_role: str | None = None
 
+
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: uuid.UUID
     created_at: datetime

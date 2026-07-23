@@ -6,6 +6,7 @@ from app.schemas.user import UserCreate
 from app.schemas.token import Token
 from fastapi import HTTPException, status
 
+
 class UserService:
     def __init__(self, db: Session):
         self.user_repo = UserRepository(db)
@@ -18,7 +19,7 @@ class UserService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email is already registered.",
             )
-        
+
         hashed_password = get_password_hash(user_in.password)
         db_user = User(
             email=user_in.email,
@@ -41,6 +42,6 @@ class UserService:
                 detail="Incorrect email or password.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         token = create_access_token(subject=user.id)
         return Token(access_token=token, token_type="bearer")

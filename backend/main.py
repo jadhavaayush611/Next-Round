@@ -32,12 +32,15 @@ if settings.BACKEND_CORS_ORIGINS:
 # Include application route aggregates
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+
 @app.get("/", tags=["healthcheck"])
 def healthcheck() -> dict:
     """Basic healthcheck endpoint to verify FastAPI online status."""
     return {"status": "ok", "project": settings.PROJECT_NAME}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     logger.info("Booting Uvicorn backend dev-server...")
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
