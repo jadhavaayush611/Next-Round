@@ -84,13 +84,39 @@ Authenticates a user and returns an access token.
 #### `GET /users/me`
 Retrieves the logged-in user's profile details.
 * **Headers**: `Authorization: Bearer <token>`
-* **Response (200 OK)**: User profile JSON object.
+* **Response (200 OK)**:
+  ```json
+  {
+    "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "email": "student@college.edu",
+    "name": "Candidate Name",
+    "full_name": "Candidate Name",
+    "username": "candidate_handle",
+    "role": "user",
+    "is_active": true,
+    "created_at": "2026-07-19T22:20:00Z",
+    "updated_at": "2026-07-19T22:20:00Z"
+  }
+  ```
 
-#### `PUT /users/me`
-Modifies the logged-in user's profile information.
+#### `PATCH /users/me`
+Modifies the logged-in user's core user information.
 * **Headers**: `Authorization: Bearer <token>`
-* **Body (JSON)**: Partial dictionary of fields to update.
-* **Response (200 OK)**: Updated user profile JSON object.
+* **Body (JSON)**: JSON object containing editable user fields to update.
+* **Editable Fields**:
+  - `full_name` (or `name`): string (non-empty)
+  - `username`: string (3-30 chars, alphanumeric, `_`, `-`, unique)
+* **Immutable / Non-User Fields (REJECTED with 422 Unprocessable Entity)**:
+  - `email`
+  - `password_hash` / `password`
+  - `role`
+  - `is_active`
+  - `created_at`
+  - `updated_at`
+  - `id`
+  - Placement profile fields (`college`, `branch`, `cgpa`, `graduation_year`, `target_role`) -> Reserved for future `StudentProfile` entity.
+* **Response (200 OK)**: Updated `UserResponse` JSON object.
+
 
 ---
 
@@ -106,4 +132,7 @@ We use HTTP status codes to communicate call results:
 | **`401 Unauthorized`**| Credentials Missing| Expired, invalid, or missing JWT headers. |
 | **`403 Forbidden`**| Permission Denied | Attempting to mutate data owned by other users. |
 | **`404 Not Found`**| Resource Missing | Target user, resume, or roadmap does not exist. |
+| **`409 Conflict`**| Conflict | Username already exists. |
+| **`422 Validation Error`**| Validation Failed | Empty update payload, invalid field formats, or attempting to modify immutable fields. |
 | **`500 Internal`**| Server Error | Unexpected database failures or internal python exceptions. |
+

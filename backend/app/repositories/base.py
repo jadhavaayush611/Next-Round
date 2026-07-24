@@ -1,12 +1,16 @@
-from typing import Any, Generic, Type, TypeVar, Sequence
+from collections.abc import Sequence
+from typing import Any, Generic, TypeVar
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
 from app.db.session import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 
+
 class BaseRepository(Generic[ModelType]):
-    def __init__(self, model: Type[ModelType], db: Session):
+    def __init__(self, model: type[ModelType], db: Session):
         """
         Base repository containing common CRUD operations.
         Isolated from service layers.

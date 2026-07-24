@@ -1,6 +1,7 @@
 from fastapi import status
 from fastapi.testclient import TestClient
 
+
 def test_healthcheck(client: TestClient) -> None:
     """Test health check route returns operational status code and message."""
     response = client.get("/")

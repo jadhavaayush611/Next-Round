@@ -88,21 +88,22 @@ erDiagram
 ## 2. Table Specifications
 
 ### 2.1 Users Table (`users`)
-Stores core candidate credentials and demographic information.
-* **Indexes**: `email` (Unique, B-Tree).
+Stores core user account credentials and identity information.
+* **Indexes**: `email` (Unique, B-Tree), `username` (Unique, B-Tree).
 
 | Column Name | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | Primary Key, default `uuid_generate_v4()` | Unique user identifier |
 | `email` | `VARCHAR(255)` | Unique, Indexed, Not Null | Candidate login email |
+| `username` | `VARCHAR(255)` | Unique, Indexed, Nullable | Candidate unique handle |
 | `hashed_password`| `VARCHAR(255)` | Not Null | Hashed password (Bcrypt) |
-| `name` | `VARCHAR(255)` | Not Null | Display name |
-| `college` | `VARCHAR(255)` | Nullable | Engineering college name |
-| `graduation_year`| `INTEGER` | Nullable | Expected graduation year |
-| `branch` | `VARCHAR(255)` | Nullable | Branch (e.g., CSE, IT) |
-| `cgpa` | `FLOAT` | Nullable | Cumulative GPA |
-| `target_role` | `VARCHAR(255)` | Nullable | Target role (e.g. Backend) |
-| `created_at` | `TIMESTAMP` | Default UTC now | Row creation timestamp |
+| `name` | `VARCHAR(255)` | Not Null | Display name (maps to `full_name`) |
+| `role` | `VARCHAR(50)` | Not Null, default `'user'` | Role assignment |
+| `is_active` | `BOOLEAN` | Not Null, default `true` | Account active flag |
+| `created_at` | `TIMESTAMP` | Not Null, Default UTC now | Row creation timestamp |
+| `updated_at` | `TIMESTAMP` | Not Null, Default UTC now | Row modification timestamp |
+
+
 
 ### 2.2 Resumes Table (`resumes`)
 Persists parsed resume contents.

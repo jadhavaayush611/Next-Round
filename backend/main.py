@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
+
+from app.api.api import api_router
 from app.config.settings import settings
 from app.core.logging import setup_logging
 from app.middleware.logging_middleware import LoggingMiddleware
-from app.api.api import api_router
-from loguru import logger
 
 # Initialize logging system using loguru interceptors
 setup_logging()
@@ -32,12 +33,15 @@ if settings.BACKEND_CORS_ORIGINS:
 # Include application route aggregates
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+
 @app.get("/", tags=["healthcheck"])
-def healthcheck() -> dict:
+def healthcheck() -> dict[str, str]:
     """Basic healthcheck endpoint to verify FastAPI online status."""
     return {"status": "ok", "project": settings.PROJECT_NAME}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     logger.info("Booting Uvicorn backend dev-server...")
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
