@@ -1,13 +1,20 @@
+import sys
 from collections.abc import Generator
+from pathlib import Path
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+# Add backend directory to sys.path before loading app modules
+backend_path = str(Path(__file__).resolve().parent.parent)
+if backend_path not in sys.path:
+    sys.path.insert(0, backend_path)
 
-from app.db.session import Base, get_db
-from main import app
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
+
+from app.db.session import Base, get_db  # noqa: E402
+from main import app  # noqa: E402
 
 # Using an in-memory SQLite database for fast, isolated unit testing
 SQLALCHEMY_DATABASE_URL = "sqlite://"
@@ -21,14 +28,14 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 
 @pytest.fixture(scope="session", autouse=True)
-def create_test_db() -> Generator:
+def create_test_db() -> Generator[None, None, None]:
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope="function")
-def db() -> Generator:
+def db() -> Generator[Session, None, None]:
     """Provides a transactional database session per test function."""
     connection = engine.connect()
     transaction = connection.begin()
@@ -42,10 +49,10 @@ def db() -> Generator:
 
 
 @pytest.fixture(scope="function")
-def client(db) -> Generator[TestClient, None, None]:
+def client(db: Session) -> Generator[TestClient, None, None]:
     """Provides a TestClient with overridden get_db dependency injection."""
 
-    def override_get_db():
+    def override_get_db() -> Generator[Session, None, None]:
         try:
             yield db
         finally:

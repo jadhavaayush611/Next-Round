@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from pydantic import field_validator, model_validator
@@ -19,16 +20,20 @@ class Settings(BaseSettings):
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Any) -> list[str]:
-        if isinstance(v, str) and not v.startswith("["):
+        if isinstance(v, str):
+            if not v.strip():
+                return []
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    res = json.loads(v)
+                    if isinstance(res, list):
+                        return [str(item) for item in res]
+                except Exception:
+                    pass
             return [i.strip() for i in v.split(",") if i.strip()]
-        elif isinstance(v, str) and v.startswith("["):
-            import json
-
-            res = json.loads(v)
-            return res if isinstance(res, list) else [str(res)]
         elif isinstance(v, list):
-            return v
-        raise ValueError(v)
+            return [str(item) for item in v]
+        return []
 
     # Database
     POSTGRES_SERVER: str = "localhost"
@@ -48,19 +53,20 @@ class Settings(BaseSettings):
         return f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # Security
-    JWT_SECRET: str = "dev_secret_key_for_local_development_only"
+    JWT_SECRET: str = "dev_secret_key_change_in_production_123456789"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     @model_validator(mode="after")
-    def validate_production_security(self) -> "Settings":
-        if self.ENVIRONMENT.lower() == "production":
+    def validate_production_jwt_secret(self) -> "Settings":
+        if self.ENVIRONMENT == "production":
             if (
                 not self.JWT_SECRET
-                or self.JWT_SECRET == "dev_secret_key_for_local_development_only"
+                or self.JWT_SECRET == "dev_secret_key_change_in_production_123456789"
+                or self.JWT_SECRET == "change_me_in_production_jwt_secret_key_12345"
             ):
                 raise ValueError(
-                    "JWT_SECRET must be set via environment variables in production."
+                    "JWT_SECRET must be configured with a secure custom secret in production mode."
                 )
         return self
 

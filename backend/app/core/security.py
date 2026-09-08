@@ -1,40 +1,30 @@
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 
 from app.config.settings import settings
 
-# Fix passlib compatibility with bcrypt 4.x/5.x
-if not hasattr(bcrypt, "__about__"):
-    ver = getattr(bcrypt, "__version__", "5.0.0")
-    bcrypt.__about__ = type("about", (), {"__version__": ver})  # type: ignore[attr-defined]
-
-_orig_hashpw = bcrypt.hashpw
-
-
-def _patched_hashpw(password: bytes, salt: bytes) -> bytes:
-    if len(password) > 72:
-        password = password[:72]
-    return _orig_hashpw(password, salt)
-
-
-bcrypt.hashpw = _patched_hashpw
-
-# Setup password context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain password against its hash."""
-    return bool(pwd_context.verify(plain_password[:72], hashed_password))
+    """Verify a plain password against its bcrypt hash."""
+    pwd_bytes = plain_password.encode("utf-8")
+    if len(pwd_bytes) > 72:
+        pwd_bytes = pwd_bytes[:72]
+    try:
+        return bcrypt.checkpw(pwd_bytes, hashed_password.encode("utf-8"))
+    except Exception:
+        return False
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password using bcrypt."""
-    return str(pwd_context.hash(password[:72]))
+    pwd_bytes = password.encode("utf-8")
+    if len(pwd_bytes) > 72:
+        pwd_bytes = pwd_bytes[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def create_access_token(
@@ -51,4 +41,4 @@ def create_access_token(
     encoded_jwt = jwt.encode(
         to_encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM
     )
-    return str(encoded_jwt)
+    return cast(str, encoded_jwt)

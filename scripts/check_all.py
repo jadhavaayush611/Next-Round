@@ -3,6 +3,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Configure stdout for utf-8 if possible
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Color helpers
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -11,12 +18,14 @@ RESET = "\033[0m"
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
+# Detect python executable in .venv if available
+venv_dir = ROOT_DIR / ".venv"
+if sys.platform == "win32":
+    venv_python = venv_dir / "Scripts" / "python.exe"
+else:
+    venv_python = venv_dir / "bin" / "python"
 
-if hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
+PYTHON_EXE = str(venv_python) if venv_python.exists() else sys.executable
 
 
 def run_step(name: str, cmd: list[str], cwd: Path) -> bool:
@@ -24,10 +33,9 @@ def run_step(name: str, cmd: list[str], cwd: Path) -> bool:
     print(f"{BLUE}:: Running {name}...{RESET}")
     print(f"   Command: {' '.join(cmd)}")
     try:
-        # Use shell=True on Windows to support executables in virtualenv or PATH
         res = subprocess.run(cmd, cwd=cwd, shell=sys.platform == "win32")
         if res.returncode == 0:
-            print(f"{GREEN}[OK] {name} passed.{RESET}\n")
+            print(f"{GREEN}[PASS] {name} passed.{RESET}\n")
             return True
         else:
             print(f"{RED}[FAIL] {name} failed with exit code {res.returncode}.{RESET}\n")
@@ -42,29 +50,48 @@ def main() -> None:
 
     # --- Backend Checks ---
     backend_dir = ROOT_DIR / "backend"
-    py_exec = sys.executable
     print(f"{BLUE}======================================={RESET}")
     print(f"{BLUE}   Running Backend Formatting & Lints  {RESET}")
     print(f"{BLUE}======================================={RESET}\n")
 
     # 1. Black formatter check
     if not run_step(
-        "Backend Formatter (Black)", [py_exec, "-m", "black", "--check", "app", "tests"], backend_dir
+        "Backend Formatter (Black)",
+        [PYTHON_EXE, "-m", "black", "--check", "app", "tests"],
+        backend_dir,
     ):
         success = False
 
-    # 2. Ruff linter check
+    # 2. Isort import ordering check
     if not run_step(
-        "Backend Linter (Ruff)", [py_exec, "-m", "ruff", "check", "app", "tests"], backend_dir
+        "Backend Import Order (isort)",
+        [PYTHON_EXE, "-m", "isort", "--check-only", "app", "tests"],
+        backend_dir,
     ):
         success = False
 
-    # 3. Mypy type validation check
-    if not run_step("Backend Type Checker (Mypy)", [py_exec, "-m", "mypy", "app"], backend_dir):
+    # 3. Ruff linter check
+    if not run_step(
+        "Backend Linter (Ruff)",
+        [PYTHON_EXE, "-m", "ruff", "check", "app", "tests"],
+        backend_dir,
+    ):
         success = False
 
-    # 4. Pytest unit tests execution
-    if not run_step("Backend Unit Tests (Pytest)", [py_exec, "-m", "pytest", "tests"], backend_dir):
+    # 4. Mypy type validation check
+    if not run_step(
+        "Backend Type Checker (Mypy)",
+        [PYTHON_EXE, "-m", "mypy", "app"],
+        backend_dir,
+    ):
+        success = False
+
+    # 5. Pytest unit tests execution
+    if not run_step(
+        "Backend Unit Tests (Pytest)",
+        [PYTHON_EXE, "-m", "pytest", "tests"],
+        backend_dir,
+    ):
         success = False
 
     # --- Frontend Checks ---
@@ -85,14 +112,16 @@ def main() -> None:
 
     # 3. TypeScript typecheck
     if not run_step(
-        "Frontend Type Checker (TypeScript)", ["npm", "run", "typecheck"], frontend_dir
+        "Frontend Type Checker (TypeScript)",
+        ["npm", "run", "typecheck"],
+        frontend_dir,
     ):
         success = False
 
     # --- Summary ---
     print(f"{BLUE}======================================={RESET}")
     if success:
-        print(f"{GREEN}[OK] ALL MONOREPO CHECKS PASSED SUCCESSFULLY.{RESET}")
+        print(f"{GREEN}[SUCCESS] ALL MONOREPO CHECKS PASSED SUCCESSFULLY.{RESET}")
         sys.exit(0)
     else:
         print(f"{RED}[FAIL] SOME MONOREPO CHECKS FAILED. SEE DETAILS ABOVE.{RESET}")
@@ -101,3 +130,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

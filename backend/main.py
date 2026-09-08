@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
+
+from app.api.api import api_router
 from app.config.settings import settings
 from app.core.logging import setup_logging
 from app.middleware.logging_middleware import LoggingMiddleware
-from app.api.api import api_router
-from loguru import logger
 
 # Initialize logging system using loguru interceptors
 setup_logging()
@@ -34,7 +35,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["healthcheck"])
-def healthcheck() -> dict:
+def healthcheck() -> dict[str, str]:
     """Basic healthcheck endpoint to verify FastAPI online status."""
     return {"status": "ok", "project": settings.PROJECT_NAME}
 

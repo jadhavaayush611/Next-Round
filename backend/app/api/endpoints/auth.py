@@ -19,7 +19,8 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> UserResponse
     Validates input and issues a new user record.
     """
     user_service = UserService(db)
-    return user_service.register_user(user_in)  # type: ignore[return-value]
+    user = user_service.register_user(user_in)
+    return UserResponse.model_validate(user)
 
 
 @router.post("/login", response_model=Token)

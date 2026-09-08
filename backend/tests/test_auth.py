@@ -8,11 +8,6 @@ def test_user_auth_flow(client: TestClient) -> None:
         "email": "test@nextround.in",
         "password": "strongpassword123",
         "name": "Test Candidate",
-        "college": "IIT Bombay",
-        "graduation_year": 2027,
-        "branch": "Computer Science",
-        "cgpa": 9.2,
-        "target_role": "Backend Developer",
     }
 
     # 1. Registration
@@ -31,7 +26,10 @@ def test_user_auth_flow(client: TestClient) -> None:
     assert fail_response.status_code == status.HTTP_401_UNAUTHORIZED
 
     # 4. Login to acquire JWT access token
-    login_data = {"username": user_data["email"], "password": user_data["password"]}
+    login_data: dict[str, str] = {
+        "username": str(user_data["email"]),
+        "password": str(user_data["password"]),
+    }
     login_response = client.post("/api/v1/auth/login", data=login_data)
     assert login_response.status_code == status.HTTP_200_OK
     assert "access_token" in login_response.json()
@@ -42,4 +40,37 @@ def test_user_auth_flow(client: TestClient) -> None:
     me_response = client.get("/api/v1/users/me", headers=headers)
     assert me_response.status_code == status.HTTP_200_OK
     assert me_response.json()["email"] == user_data["email"]
-    assert me_response.json()["target_role"] == "Backend Developer"
+    assert me_response.json()["name"] == "Test Candidate"
+
+
+def test_login_invalid_credentials(client: TestClient) -> None:
+    """Test login failure with non-existent email or wrong password."""
+    # Register user first
+    user_data = {
+        "email": "credentials_test@nextround.in",
+        "password": "CorrectPassword123!",
+        "name": "Auth User",
+    }
+    client.post("/api/v1/auth/register", json=user_data)
+
+    # 1. Non-existent email
+    res1 = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "wrong_email@nextround.in",
+            "password": "CorrectPassword123!",
+        },
+    )
+    assert res1.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "Incorrect email or password" in res1.json()["detail"]
+
+    # 2. Incorrect password
+    res2 = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "credentials_test@nextround.in",
+            "password": "WrongPassword!",
+        },
+    )
+    assert res2.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "Incorrect email or password" in res2.json()["detail"]
