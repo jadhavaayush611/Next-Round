@@ -34,15 +34,3 @@ def update_user_profile(
     user_service = UserService(db)
     updated_user = user_service.update_user_profile(current_user, user_in)
     return UserResponse.model_validate(updated_user)
-
-
-@router.put("/me", response_model=UserResponse)
-def put_user_profile(
-    user_in: UserUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-) -> UserResponse:
-    """
-    PUT endpoint for modifying user profile (delegates to patch implementation).
-    """
-    return update_user_profile(user_in=user_in, current_user=current_user, db=db)

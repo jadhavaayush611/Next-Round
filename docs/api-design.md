@@ -40,13 +40,9 @@ Creates a new candidate account.
   ```json
   {
     "email": "student@college.edu",
-    "password": "securepassword",
+    "password": "securepassword123",
     "name": "Candidate Name",
-    "college": "Institute Name",
-    "graduation_year": 2027,
-    "branch": "Computer Science",
-    "cgpa": 8.5,
-    "target_role": "Backend Developer"
+    "username": "candidate_handle"
   }
   ```
 * **Response (201 Created)**:
@@ -55,12 +51,12 @@ Creates a new candidate account.
     "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
     "email": "student@college.edu",
     "name": "Candidate Name",
-    "college": "Institute Name",
-    "graduation_year": 2027,
-    "branch": "Computer Science",
-    "cgpa": 8.5,
-    "target_role": "Backend Developer",
-    "created_at": "2026-07-19T22:20:00Z"
+    "full_name": "Candidate Name",
+    "username": "candidate_handle",
+    "role": "user",
+    "is_active": true,
+    "created_at": "2026-07-19T22:20:00Z",
+    "updated_at": "2026-07-19T22:20:00Z"
   }
   ```
 

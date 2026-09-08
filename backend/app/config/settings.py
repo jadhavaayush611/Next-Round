@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -56,6 +56,19 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "dev_secret_key_change_in_production_123456789"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    @model_validator(mode="after")
+    def validate_production_jwt_secret(self) -> "Settings":
+        if self.ENVIRONMENT == "production":
+            if (
+                not self.JWT_SECRET
+                or self.JWT_SECRET == "dev_secret_key_change_in_production_123456789"
+                or self.JWT_SECRET == "change_me_in_production_jwt_secret_key_12345"
+            ):
+                raise ValueError(
+                    "JWT_SECRET must be configured with a secure custom secret in production mode."
+                )
+        return self
 
 
 settings = Settings()

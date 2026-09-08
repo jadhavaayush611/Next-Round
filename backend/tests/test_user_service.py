@@ -91,3 +91,62 @@ def test_user_service_update_same_username_allowed(db: Session) -> None:
     updated = service.update_user_profile(user, update_in)
     assert updated.username == "my_username"
     assert updated.name == "Same User Updated"
+
+
+def test_user_service_duplicate_email_conflict(db: Session) -> None:
+    service = UserService(db)
+    service.register_user(
+        UserCreate(
+            email="duplicate@nextround.in",
+            password="password123",
+            name="User Original",
+        )
+    )
+    with pytest.raises(HTTPException) as exc_info:
+        service.register_user(
+            UserCreate(
+                email="duplicate@nextround.in",
+                password="password123",
+                name="User Duplicate",
+            )
+        )
+    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Email is already registered" in exc_info.value.detail
+
+
+def test_user_persistence_and_soft_delete(db: Session) -> None:
+    """Tests CRUD persistence lifecycle including soft deletion."""
+    from app.repositories.user import UserRepository
+
+    repo = UserRepository(db)
+    service = UserService(db)
+
+    # 1. Create
+    user = service.register_user(
+        UserCreate(
+            email="persistence@nextround.in",
+            password="password123",
+            name="Persistence User",
+            username="persist_user",
+        )
+    )
+    user_id = user.id
+    assert user.is_active is True
+
+    # 2. Lookup by ID, Email, and Username
+    assert repo.get(user_id) is not None
+    assert repo.get_by_email("persistence@nextround.in") is not None
+    assert repo.get_by_username("persist_user") is not None
+
+    # 3. Update
+    updated = repo.update(user, {"name": "Updated Persist User"})
+    assert updated.name == "Updated Persist User"
+
+    # 4. Soft Delete (is_active = False)
+    soft_deleted = repo.update(user, {"is_active": False})
+    assert soft_deleted.is_active is False
+
+    # Soft-deleted user record still exists for audit, but is_active is False
+    persisted_user = repo.get(user_id)
+    assert persisted_user is not None
+    assert persisted_user.is_active is False

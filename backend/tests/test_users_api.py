@@ -62,3 +62,35 @@ def test_patch_me_username_conflict(client: TestClient) -> None:
     )
     assert response.status_code == status.HTTP_409_CONFLICT
     assert "Username already exists" in response.json()["detail"]
+
+
+def test_user_cannot_access_or_affect_other_user_profile(
+    client: TestClient,
+) -> None:
+    token_a = get_auth_token(client, "isolated_a@nextround.in", "User Isolation A")
+    token_b = get_auth_token(client, "isolated_b@nextround.in", "User Isolation B")
+
+    headers_a = {"Authorization": f"Bearer {token_a}"}
+    headers_b = {"Authorization": f"Bearer {token_b}"}
+
+    # Fetch profile A
+    res_a = client.get("/api/v1/users/me", headers=headers_a)
+    assert res_a.status_code == status.HTTP_200_OK
+    assert res_a.json()["email"] == "isolated_a@nextround.in"
+    assert res_a.json()["name"] == "User Isolation A"
+
+    # Fetch profile B
+    res_b = client.get("/api/v1/users/me", headers=headers_b)
+    assert res_b.status_code == status.HTTP_200_OK
+    assert res_b.json()["email"] == "isolated_b@nextround.in"
+    assert res_b.json()["name"] == "User Isolation B"
+
+    # Mutate profile A
+    patch_a = client.patch(
+        "/api/v1/users/me", headers=headers_a, json={"full_name": "Mutated User A"}
+    )
+    assert patch_a.status_code == status.HTTP_200_OK
+
+    # Verify profile B remains untouched
+    res_b_after = client.get("/api/v1/users/me", headers=headers_b)
+    assert res_b_after.json()["name"] == "User Isolation B"

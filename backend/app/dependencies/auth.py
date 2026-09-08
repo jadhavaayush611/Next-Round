@@ -39,6 +39,6 @@ def get_current_user(
 
     user_repo = UserRepository(db)
     user = user_repo.get(token_payload.sub)
-    if user is None:
+    if user is None or not user.is_active:
         raise credentials_exception
     return user
