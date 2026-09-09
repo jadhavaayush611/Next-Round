@@ -1,10 +1,14 @@
 import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.resume import Resume
 
 
 class User(Base):
@@ -30,6 +34,9 @@ class User(Base):
         onupdate=lambda: datetime.now(UTC),
         nullable=False,
     )
+
+    # Relationships
+    resumes: Mapped[list["Resume"]] = relationship("Resume", back_populates="user")
 
     @property
     def full_name(self) -> str:

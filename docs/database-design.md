@@ -11,24 +11,26 @@ erDiagram
     USER {
         uuid id PK
         string email UK
+        string username UK
         string hashed_password
         string name
-        string college
-        int graduation_year
-        string branch
-        float cgpa
-        string target_role
+        string role
+        boolean is_active
         datetime created_at
+        datetime updated_at
     }
 
     RESUME {
         uuid id PK
         uuid user_id FK
-        string file_path
-        string file_name
-        string parsed_text
-        jsonb parsed_sections
-        datetime uploaded_at
+        string original_filename
+        string storage_key UK
+        string mime_type
+        int file_size
+        int version
+        enum status
+        datetime created_at
+        datetime updated_at
     }
 
     PLACEMENT_ASSESSMENT {
@@ -106,18 +108,44 @@ Stores core user account credentials and identity information.
 
 
 ### 2.2 Resumes Table (`resumes`)
-Persists parsed resume contents.
-* **JSONB Fields**: `parsed_sections` maps headers to text chunks (e.g., `{"Education": "...", "Skills": "..."}`).
+Persists candidate resume records, storage metadata, versioning, and processing lifecycle status.
+* **Relationship**: User 1:N Resume. A resume belongs to exactly one user. No physical cascade delete on user deletion to preserve audit history and soft-deletion guarantees.
+* **Indexes**:
+  - `ix_resumes_user_id` on `user_id`
+  - `ix_resumes_storage_key` on `storage_key` (Unique)
+  - `ix_resumes_user_id_version` on `(user_id, version)`
+* **Constraints**:
+  - `uq_resumes_storage_key`: Unique constraint on `storage_key`
+  - `uq_resumes_user_version`: Unique constraint on `(user_id, version)`
+  - `ck_resumes_file_size_positive`: `file_size > 0`
+  - `ck_resumes_version_positive`: `version > 0`
 
 | Column Name | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | Primary Key | Resume record ID |
-| `user_id` | `UUID` | Foreign Key (`users.id`), cascade delete | Reference to the owner candidate |
-| `file_path` | `VARCHAR(512)` | Not Null | Path to local or S3 PDF file |
-| `file_name` | `VARCHAR(255)` | Not Null | Original upload file name |
-| `parsed_text` | `TEXT` | Not Null | Raw text extracted from document |
-| `parsed_sections`| `JSONB` | Default `{}` | Extracted sections mapping |
-| `uploaded_at` | `TIMESTAMP` | Default UTC now | Upload timestamp |
+| `id` | `UUID` | Primary Key, default `uuid.uuid4()` | Unique resume record ID |
+| `user_id` | `UUID` | Foreign Key (`users.id`), Indexed, Not Null | Reference to owning user |
+| `original_filename` | `VARCHAR(255)` | Not Null | Client-uploaded original filename |
+| `storage_key` | `VARCHAR(500)` | Unique, Indexed, Not Null | Internal object storage reference/path |
+| `mime_type` | `VARCHAR(100)` | Not Null | File MIME type (e.g. `application/pdf`) |
+| `file_size` | `INTEGER` | Not Null, `> 0` | Size of uploaded file in bytes |
+| `version` | `INTEGER` | Not Null, Default `1`, `> 0` | Monotonically incrementing version number per user |
+| `status` | `ENUM` | `resume_status`, Default `'UPLOADED'`, Not Null | Lifecycle state (`UPLOADED`, `PROCESSING`, `READY`, `FAILED`, `ARCHIVED`) |
+| `created_at` | `TIMESTAMP` | Not Null, Default UTC now | Resume record creation timestamp |
+| `updated_at` | `TIMESTAMP` | Not Null, Default UTC now | Timestamp of last status or metadata update |
+
+#### Resume Status Lifecycle
+```
+[UPLOADED] ──► [PROCESSING] ──► [READY] (or [FAILED])
+     │               │              │
+     └───────────────┴──────────────┴──► [ARCHIVED]
+```
+
+#### Versioning Strategy
+- Each user can upload multiple resume iterations.
+- Resumes are sequentially numbered (`version = 1, 2, 3...`) per `user_id`.
+- The repository provides `get_latest_version(user_id)` querying `MAX(version)` to determine the next version index.
+- Previous versions remain intact to maintain assessment and audit historical continuity.
+
 
 ### 2.3 Placement Assessments Table (`placement_assessments`)
 Maintains evaluations along the five pillars.
