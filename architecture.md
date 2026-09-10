@@ -162,15 +162,43 @@ erDiagram
 
 ## 4. Key Engines and Algorithms
 
-### 4.1 Resume Upload & Parsing Engine
-1. **Document Ingestion**: Backend ingests `.pdf` and `.docx` files.
-2. **Text Extraction**: Uses `pdfplumber` for precise character coordinate extractions and tabular data capture (important for education history extraction). Falls back to `PyPDF2` or `python-docx` depending on the extension.
-3. **NLP Section Classification**: Rules combined with spaCy NLP identify section boundaries (e.g., separating "Projects" from "Experience").
-4. **Skill & Tech Stack Harvesting**: Runs text through custom spaCy NER models and regular expression mapping layers to categorize languages, frameworks, databases, and DevOps tools.
+### 4.1 Secure Resume Upload & Storage Pipeline
+1. **Document Ingestion**: Backend accepts `.pdf` and `.docx` files via `POST /api/v1/resumes`.
+2. **Intentional Security Boundary (Phase 2.2 vs Phase 2.3)**: 
+   - **Untrusted Client Metadata**: Client-supplied `Content-Type` and `filename` are treated as untrusted inputs.
+   - **Phase 2.2 Lightweight Checks**: Combines case-insensitive extension whitelist (`.pdf`, `.docx`), MIME type consistency, and lightweight magic-byte signature validation (`%PDF-` for PDF, `PK` ZIP archive header for DOCX).
+   - **Phase 2.3 Scope Boundary**: Full structural validation (PDF object tree inspection, DOCX OpenXML DOM verification, text extraction) belongs strictly to Phase 2.3.
+3. **Upload Size Enforcement**:
+   - Starlette / FastAPI multipart parser receives the incoming multipart stream into a managed temporary buffer (`UploadFile`).
+   - The permanent storage persistence limit (default 5 MB, configurable via `MAX_UPLOAD_SIZE_BYTES`) is actively enforced during the chunked copy into permanent storage.
+   - If the incoming stream exceeds the limit, chunked copying terminates immediately, partial disk files are unlinked, and an HTTP `413 Payload Too Large` is returned, guaranteeing oversized uploads are never permanently stored.
+4. **Storage Abstraction Layer**:
+   - Resumes are stored using safe storage keys (`users/{user_id}/resumes/{resume_id}.{ext}`) where the filename is generated from the Resume UUID, never user-controlled filenames.
+   - All filesystem operations are decoupled behind `BaseStorageService` and implemented via `LocalStorageService` with configurable root (`STORAGE_LOCAL_ROOT`).
+   - Clean boundary for future replacement with object storage (e.g., S3/GCS/MinIO).
+5. **Transactional Integrity & Rollback**:
+   - If database persistence or commits fail after saving the file to storage, the database transaction is rolled back and the physical file is immediately purged to eliminate orphaned storage artifacts.
 
 ```mermaid
 flowchart TD
-    File[Upload Resume] --> Extract[Extract Text via pdfplumber]
+    Client[Client / Frontend] -->|POST /api/v1/resumes| Endpoint[FastAPI Resume Endpoint]
+    Endpoint -->|Authenticate JWT| Auth[User Auth Dependency]
+    Endpoint -->|Delegate Upload| Service[Resume Service]
+    Service -->|Extension, MIME, Magic Sig, Limit| Validator[Validation Layer]
+    Service -->|Save Chunks with Cap| Storage[Storage Abstraction]
+    Storage -->|Write users/:uid/resumes/:rid.ext| LocalFS[Local Filesystem Storage]
+    Service -->|Create Record version=N+1 status=UPLOADED| DB[(PostgreSQL Database)]
+    Service -->|On Failure: Purge File| Cleanup[Storage Cleanup Handler]
+```
+
+### 4.2 Resume Parsing Engine (Phase 2.3+)
+1. **Text Extraction**: Uses `pdfplumber` for precise character coordinate extractions and tabular data capture (important for education history extraction). Falls back to `PyPDF2` or `python-docx` depending on the extension.
+2. **NLP Section Classification**: Rules combined with spaCy NLP identify section boundaries (e.g., separating "Projects" from "Experience").
+3. **Skill & Tech Stack Harvesting**: Runs text through custom spaCy NER models and regular expression mapping layers to categorize languages, frameworks, databases, and DevOps tools.
+
+```mermaid
+flowchart TD
+    File[Stored Resume] --> Extract[Extract Text via pdfplumber]
     Extract --> Sections[Parse Sections: Education, Skills, Projects, etc.]
     Sections --> spaCy[spaCy NLP Entity Recognizer]
     Sections --> Regex[Regex Phrase Dictionary Matcher]

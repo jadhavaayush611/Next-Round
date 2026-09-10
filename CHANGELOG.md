@@ -1,9 +1,19 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to the NextRound platform will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2026-07-26
+
+### Added
+- **Secure File Storage Abstraction**: Abstract `BaseStorageService` and `LocalStorageService` for decoupled, path-traversal resistant binary persistence outside application source code.
+- **Resume Upload API**: Authenticated `POST /api/v1/resumes` accepting PDF and DOCX documents with automatic versioning (`latest_version + 1`) and `UPLOADED` initial status.
+- **Strict Security & Signature Validation**: Lightweight magic-byte verification (`%PDF-` and `PK`), extension whitelist, MIME compatibility, non-empty checks, and streaming 5 MB upload size enforcement.
+- **Transaction Rollback & Storage Cleanup**: Automatic database rollback and stored file deletion upon database persistence or commit failures.
+- **Docker Persistence**: Persistent named volumes (`resume_uploads`, `resume_uploads_prod`) configured for local development and production container environments.
+- **Security & Storage Test Suite**: 19 new unit and integration tests covering magic byte verification, MIME spoofing prevention, path traversal rejection, version incrementing, ownership isolation, and failure recovery.
 
 ## [0.1.0] - 2026-07-25
 

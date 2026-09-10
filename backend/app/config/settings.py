@@ -57,6 +57,15 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # Storage & Uploads
+    STORAGE_LOCAL_ROOT: str = "uploads"
+    MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
+    ALLOWED_RESUME_EXTENSIONS: list[str] = [".pdf", ".docx"]
+    ALLOWED_RESUME_MIME_TYPES: list[str] = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ]
+
     @model_validator(mode="after")
     def validate_production_jwt_secret(self) -> "Settings":
         if self.ENVIRONMENT == "production":
