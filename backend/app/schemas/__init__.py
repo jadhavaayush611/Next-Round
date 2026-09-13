@@ -17,6 +17,10 @@ from app.schemas.canonical_resume import (
     VolunteeringItem,
 )
 from app.schemas.resume import ResumeListResponse, ResumeResponse
+from app.schemas.resume_parse import (
+    CanonicalResumeResponse,
+    ResumeParseResponse,
+)
 from app.schemas.token import Token, TokenPayload
 from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
 
@@ -25,6 +29,7 @@ __all__ = [
     "AwardItem",
     "CandidateIdentity",
     "CanonicalResume",
+    "CanonicalResumeResponse",
     "CertificationItem",
     "DateInfo",
     "EducationItem",
@@ -35,6 +40,7 @@ __all__ = [
     "ProjectItem",
     "PublicationItem",
     "ResumeListResponse",
+    "ResumeParseResponse",
     "ResumeResponse",
     "SkillCategory",
     "SummarySection",

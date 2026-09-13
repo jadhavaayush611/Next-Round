@@ -7,6 +7,7 @@ from app.services.extraction import (
     ExtractionStatus,
     Provenance,
 )
+from app.services.parse_service import ResumeParseService
 from app.services.parser import SemanticResumeParser
 from app.services.resume import ResumeService
 from app.services.storage import BaseStorageService, LocalStorageService
@@ -22,6 +23,7 @@ __all__ = [
     "ExtractionStatus",
     "LocalStorageService",
     "Provenance",
+    "ResumeParseService",
     "ResumeService",
     "SemanticResumeParser",
     "UserService",

@@ -16,6 +16,10 @@ from app.schemas.canonical_resume import (
     SummarySection,
     VolunteeringItem,
 )
+from app.services.parser.constants import (
+    PARSER_VERSION,
+    SCHEMA_VERSION,
+)
 from app.services.parser.dates import (
     extract_date_from_text,
     parse_date_string,
@@ -42,8 +46,10 @@ __all__ = [
     "LanguageItem",
     "LinkItem",
     "OrganizationItem",
+    "PARSER_VERSION",
     "ProjectItem",
     "PublicationItem",
+    "SCHEMA_VERSION",
     "SECTION_SYNONYMS",
     "SectionBlock",
     "SectionType",
