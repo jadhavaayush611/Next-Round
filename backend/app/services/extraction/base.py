@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from app.services.extraction.models import ExtractionResult
+from app.services.extraction.models import ExtractedDocument, ExtractionResult
 
 
 class BaseDocumentExtractor(ABC):
@@ -21,7 +21,15 @@ class BaseDocumentExtractor(ABC):
     @abstractmethod
     def extract(self, file_path: Path | str) -> ExtractionResult:
         """
-        Extract text from the specified document path.
+        Extract plain text from the specified document path.
         Must raise DocumentReadError or DocumentContentError on failure.
         """
         pass
+
+    def extract_document(self, file_path: Path | str) -> ExtractedDocument:
+        """
+        Extract structured ExtractedDocument with elements and numeric provenance.
+        Extractors can override this for granular native structure extraction.
+        """
+        result = self.extract(file_path)
+        return ExtractedDocument.from_extraction_result(result)

@@ -5,6 +5,8 @@ import pdfplumber
 from app.services.extraction.base import BaseDocumentExtractor
 from app.services.extraction.exceptions import DocumentContentError, DocumentReadError
 from app.services.extraction.models import (
+    ExtractedDocument,
+    ExtractedElement,
     ExtractionIssue,
     ExtractionResult,
     ExtractionStatus,
@@ -85,6 +87,79 @@ class PDFExtractor(BaseDocumentExtractor):
                     status=status,
                     page_count=len(pdf.pages),
                     extraction_issues=issues,
+                )
+        except (FileNotFoundError, PermissionError) as exc:
+            raise DocumentReadError(f"Failed to access PDF document: {exc}") from None
+        except DocumentContentError:
+            raise
+        except Exception as exc:
+            raise DocumentContentError(
+                f"Failed to extract text from PDF document: {exc}"
+            ) from None
+
+    def extract_document(self, file_path: Path | str) -> ExtractedDocument:
+        path = Path(file_path)
+        if not path.exists() or not path.is_file():
+            raise DocumentReadError(f"PDF document not found at: {path}")
+
+        try:
+            with pdfplumber.open(path) as pdf:
+                elements: list[ExtractedElement] = []
+                page_texts: list[str] = []
+                issues: list[ExtractionIssue] = []
+                elem_order = 0
+
+                for page_idx, page in enumerate(pdf.pages, start=1):
+                    try:
+                        extracted = page.extract_text()
+                        if extracted:
+                            page_texts.append(extracted)
+                            norm_page = normalize_text(extracted)
+                            blocks = [
+                                b.strip() for b in norm_page.split("\n\n") if b.strip()
+                            ]
+                            for block in blocks:
+                                elem_order += 1
+                                elements.append(
+                                    ExtractedElement(
+                                        element_id=elem_order,
+                                        page_number=page_idx,
+                                        order=elem_order,
+                                        element_type="paragraph",
+                                        text=block,
+                                    )
+                                )
+                        else:
+                            page_texts.append("")
+                    except Exception as exc:
+                        issues.append(
+                            ExtractionIssue(
+                                location_type="page",
+                                location=page_idx,
+                                reason=f"Failed to extract text from page {page_idx}: {exc}",
+                            )
+                        )
+                        page_texts.append("")
+
+                raw_text = "\n\n".join(page_texts)
+                normalized = normalize_text(raw_text)
+
+                if issues and not normalized:
+                    raise DocumentContentError(
+                        "All PDF pages failed to extract content."
+                    )
+
+                metadata = {
+                    "extractor_type": self.extractor_type,
+                    "page_count": len(pdf.pages),
+                    "character_count": len(normalized),
+                }
+
+                return ExtractedDocument(
+                    elements=elements,
+                    full_text=normalized,
+                    extraction_issues=issues,
+                    metadata=metadata,
                 )
         except (FileNotFoundError, PermissionError) as exc:
             raise DocumentReadError(f"Failed to access PDF document: {exc}") from None

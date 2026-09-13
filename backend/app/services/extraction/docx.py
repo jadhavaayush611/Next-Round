@@ -7,6 +7,8 @@ from docx.text.paragraph import Paragraph
 from app.services.extraction.base import BaseDocumentExtractor
 from app.services.extraction.exceptions import DocumentContentError, DocumentReadError
 from app.services.extraction.models import (
+    ExtractedDocument,
+    ExtractedElement,
     ExtractionIssue,
     ExtractionResult,
     ExtractionStatus,
@@ -124,6 +126,120 @@ class DOCXExtractor(BaseDocumentExtractor):
                 status=status,
                 paragraph_count=paragraph_count,
                 extraction_issues=issues,
+            )
+        except (FileNotFoundError, PermissionError) as exc:
+            raise DocumentReadError(f"Failed to access DOCX document: {exc}") from None
+        except DocumentContentError:
+            raise
+        except Exception as exc:
+            raise DocumentContentError(
+                f"Failed to extract text from DOCX document: {exc}"
+            ) from None
+
+    def extract_document(self, file_path: Path | str) -> ExtractedDocument:
+        path = Path(file_path)
+        if not path.exists() or not path.is_file():
+            raise DocumentReadError(f"DOCX document not found at: {path}")
+
+        try:
+            doc = docx.Document(str(path))
+            elements: list[ExtractedElement] = []
+            content_blocks: list[str] = []
+            issues: list[ExtractionIssue] = []
+            paragraph_count = 0
+            table_count = 0
+            element_index = 0
+            elem_order = 0
+
+            for child in doc.element.body:
+                element_index += 1
+                try:
+                    if child.tag.endswith("p"):
+                        paragraph_count += 1
+                        p = Paragraph(child, doc)
+                        txt = p.text.strip()
+                        if txt:
+                            content_blocks.append(p.text)
+                            elem_order += 1
+                            elements.append(
+                                ExtractedElement(
+                                    element_id=elem_order,
+                                    page_number=None,
+                                    order=elem_order,
+                                    element_type="paragraph",
+                                    text=normalize_text(txt),
+                                )
+                            )
+                    elif child.tag.endswith("tbl"):
+                        table_count += 1
+                        t = Table(child, doc)
+                        table_rows: list[str] = []
+                        for row in t.rows:
+                            seen_cells: set[object] = set()
+                            cell_texts: list[str] = []
+                            for cell in row.cells:
+                                if cell._tc not in seen_cells:
+                                    seen_cells.add(cell._tc)
+                                    cell_txt = cell.text.strip()
+                                    if cell_txt:
+                                        cell_texts.append(cell_txt)
+                            if cell_texts:
+                                table_rows.append("\t".join(cell_texts))
+                        if table_rows:
+                            table_full = "\n".join(table_rows)
+                            content_blocks.append(table_full)
+                            elem_order += 1
+                            elements.append(
+                                ExtractedElement(
+                                    element_id=elem_order,
+                                    page_number=None,
+                                    order=elem_order,
+                                    element_type="table",
+                                    text=normalize_text(table_full),
+                                )
+                            )
+                except Exception as exc:
+                    tag_name = (
+                        child.tag.split("}")[-1] if "}" in child.tag else child.tag
+                    )
+                    if tag_name == "p":
+                        loc_type = "paragraph"
+                        loc = paragraph_count if paragraph_count > 0 else element_index
+                    elif tag_name == "tbl":
+                        loc_type = "table"
+                        loc = table_count if table_count > 0 else element_index
+                    else:
+                        loc_type = "element"
+                        loc = element_index
+
+                    issues.append(
+                        ExtractionIssue(
+                            location_type=loc_type,
+                            location=loc,
+                            reason=f"Failed to extract text from {loc_type} at index {loc}: {exc}",
+                        )
+                    )
+
+            raw_text = "\n\n".join(content_blocks)
+            normalized = normalize_text(raw_text)
+
+            if issues and not normalized:
+                raise DocumentContentError(
+                    "All DOCX body elements failed to extract content."
+                )
+
+            metadata = {
+                "extractor_type": self.extractor_type,
+                "paragraph_count": paragraph_count,
+                "table_count": table_count,
+                "character_count": len(normalized),
+            }
+
+            return ExtractedDocument(
+                elements=elements,
+                full_text=normalized,
+                extraction_issues=issues,
+                metadata=metadata,
             )
         except (FileNotFoundError, PermissionError) as exc:
             raise DocumentReadError(f"Failed to access DOCX document: {exc}") from None

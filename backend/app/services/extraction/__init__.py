@@ -7,9 +7,12 @@ from app.services.extraction.exceptions import (
     UnsupportedDocumentError,
 )
 from app.services.extraction.models import (
+    ExtractedDocument,
+    ExtractedElement,
     ExtractionIssue,
     ExtractionResult,
     ExtractionStatus,
+    Provenance,
 )
 from app.services.extraction.normalizer import normalize_text
 from app.services.extraction.pdf import PDFExtractor
@@ -26,11 +29,14 @@ __all__ = [
     "DocumentExtractionError",
     "DocumentReadError",
     "DocumentExtractionService",
+    "ExtractedDocument",
+    "ExtractedElement",
     "ExtractionIssue",
     "ExtractionResult",
     "ExtractionStatus",
     "ExtractorRegistry",
     "PDFExtractor",
+    "Provenance",
     "UnsupportedDocumentError",
     "default_extractor_registry",
     "normalize_text",
