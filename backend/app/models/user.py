@@ -8,6 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 if TYPE_CHECKING:
+    from app.models.candidate_claim import CandidateClaim
+    from app.models.candidate_profile import CandidateProfile
     from app.models.resume import Resume
 
 
@@ -37,6 +39,17 @@ class User(Base):
 
     # Relationships
     resumes: Mapped[list["Resume"]] = relationship("Resume", back_populates="user")
+    candidate_profile: Mapped["CandidateProfile | None"] = relationship(
+        "CandidateProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    candidate_claims: Mapped[list["CandidateClaim"]] = relationship(
+        "CandidateClaim",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def full_name(self) -> str:

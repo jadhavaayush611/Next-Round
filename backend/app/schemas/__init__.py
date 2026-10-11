@@ -1,3 +1,19 @@
+from app.schemas.candidate_claim import (
+    CandidateClaimBase,
+    CandidateClaimCreate,
+    CandidateClaimResponse,
+)
+from app.schemas.candidate_profile import (
+    CandidateProfileBase,
+    CandidateProfileCreate,
+    CandidateProfileResponse,
+    CandidateProfileUpdate,
+)
+from app.schemas.candidate_target import (
+    CandidateTargetBase,
+    CandidateTargetCreate,
+    CandidateTargetResponse,
+)
 from app.schemas.canonical_resume import (
     AdditionalSection,
     AwardItem,
@@ -27,7 +43,17 @@ from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
 __all__ = [
     "AdditionalSection",
     "AwardItem",
+    "CandidateClaimBase",
+    "CandidateClaimCreate",
+    "CandidateClaimResponse",
     "CandidateIdentity",
+    "CandidateProfileBase",
+    "CandidateProfileCreate",
+    "CandidateProfileResponse",
+    "CandidateProfileUpdate",
+    "CandidateTargetBase",
+    "CandidateTargetCreate",
+    "CandidateTargetResponse",
     "CanonicalResume",
     "CanonicalResumeResponse",
     "CertificationItem",

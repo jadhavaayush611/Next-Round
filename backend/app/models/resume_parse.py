@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 if TYPE_CHECKING:
+    from app.models.candidate_claim import CandidateClaim
     from app.models.resume import Resume
 
 
@@ -87,3 +88,8 @@ class ResumeParse(Base):
 
     # Relationships
     resume: Mapped["Resume"] = relationship("Resume", back_populates="parses")
+    claims: Mapped[list["CandidateClaim"]] = relationship(
+        "CandidateClaim",
+        back_populates="resume_parse",
+        passive_deletes=True,
+    )

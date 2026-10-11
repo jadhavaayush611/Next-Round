@@ -1,3 +1,4 @@
+from app.services.candidate_service import CandidateService
 from app.services.extraction import (
     DocumentExtractionService,
     ExtractedDocument,
@@ -15,6 +16,7 @@ from app.services.user import UserService
 
 __all__ = [
     "BaseStorageService",
+    "CandidateService",
     "DocumentExtractionService",
     "ExtractedDocument",
     "ExtractedElement",

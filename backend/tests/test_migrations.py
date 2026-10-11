@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 
 
 def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
-    """Verifies that Alembic migration 003_create_resume_parses_table upgrades and downgrades cleanly."""
+    """Verifies that Alembic migrations up to 004_create_candidate_profile_target_and_claims upgrade and downgrade cleanly."""
     backend_dir = Path(__file__).resolve().parent.parent
     ini_path = backend_dir / "alembic.ini"
     alembic_cfg = Config(str(ini_path))
@@ -31,11 +31,17 @@ def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
         conn.commit()
 
     with patch("app.config.settings.Settings.sqlalchemy_database_url", sqlite_url):
-        # 1. Upgrade to latest migration (head) -> runs 001, 002, 003
+        # 1. Upgrade to latest migration (head) -> runs 001, 002, 003, 004
         command.upgrade(alembic_cfg, "head")
 
-        # 2. Downgrade 003 to 002
+        # 2. Downgrade 004 to 003
+        command.downgrade(alembic_cfg, "003_create_resume_parses_table")
+
+        # 3. Upgrade back to head to verify re-application of 004
+        command.upgrade(alembic_cfg, "head")
+
+        # 4. Downgrade 004 and 003 down to 002
         command.downgrade(alembic_cfg, "002_create_resumes_table")
 
-        # 3. Upgrade back to head to verify idempotent re-application of 003
+        # 5. Upgrade back to head to verify idempotent re-application of 003 and 004
         command.upgrade(alembic_cfg, "head")
