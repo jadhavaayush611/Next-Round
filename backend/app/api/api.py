@@ -5,6 +5,7 @@ from app.api.endpoints import (
     candidate_claims,
     candidate_profiles,
     candidate_targets,
+    evidence_sources,
     resumes,
     users,
 )
@@ -43,4 +44,9 @@ api_router.include_router(
     prefix="/candidate-profile/claims",
     tags=["candidate-claims"],
     include_in_schema=False,
+)
+
+# Evidence Source Foundation
+api_router.include_router(
+    evidence_sources.router, prefix="/evidence-sources", tags=["evidence-sources"]
 )

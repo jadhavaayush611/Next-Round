@@ -31,17 +31,23 @@ def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
         conn.commit()
 
     with patch("app.config.settings.Settings.sqlalchemy_database_url", sqlite_url):
-        # 1. Upgrade to latest migration (head) -> runs 001, 002, 003, 004
+        # 1. Upgrade to latest migration (head) -> runs 001, 002, 003, 004, 005
         command.upgrade(alembic_cfg, "head")
 
-        # 2. Downgrade 004 to 003
+        # 2. Downgrade 005 to 004
+        command.downgrade(alembic_cfg, "004_create_candidate_profile_target_and_claims")
+
+        # 3. Upgrade back to head to verify re-application of 005
+        command.upgrade(alembic_cfg, "head")
+
+        # 4. Downgrade 005 and 004 down to 003
         command.downgrade(alembic_cfg, "003_create_resume_parses_table")
 
-        # 3. Upgrade back to head to verify re-application of 004
+        # 5. Upgrade back to head to verify re-application of 004 and 005
         command.upgrade(alembic_cfg, "head")
 
-        # 4. Downgrade 004 and 003 down to 002
+        # 6. Downgrade 005, 004, 003 down to 002
         command.downgrade(alembic_cfg, "002_create_resumes_table")
 
-        # 5. Upgrade back to head to verify idempotent re-application of 003 and 004
+        # 7. Upgrade back to head to verify idempotent full chain upgrade
         command.upgrade(alembic_cfg, "head")

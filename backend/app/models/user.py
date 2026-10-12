@@ -10,6 +10,7 @@ from app.db.session import Base
 if TYPE_CHECKING:
     from app.models.candidate_claim import CandidateClaim
     from app.models.candidate_profile import CandidateProfile
+    from app.models.evidence_source import EvidenceSource
     from app.models.resume import Resume
 
 
@@ -47,6 +48,11 @@ class User(Base):
     )
     candidate_claims: Mapped[list["CandidateClaim"]] = relationship(
         "CandidateClaim",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    evidence_sources: Mapped[list["EvidenceSource"]] = relationship(
+        "EvidenceSource",
         back_populates="user",
         cascade="all, delete-orphan",
     )

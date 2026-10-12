@@ -32,6 +32,12 @@ from app.schemas.canonical_resume import (
     SummarySection,
     VolunteeringItem,
 )
+from app.schemas.evidence_source import (
+    EvidenceSourceBase,
+    EvidenceSourceCreate,
+    EvidenceSourceResponse,
+    EvidenceSourceStatusUpdate,
+)
 from app.schemas.resume import ResumeListResponse, ResumeResponse
 from app.schemas.resume_parse import (
     CanonicalResumeResponse,
@@ -59,6 +65,10 @@ __all__ = [
     "CertificationItem",
     "DateInfo",
     "EducationItem",
+    "EvidenceSourceBase",
+    "EvidenceSourceCreate",
+    "EvidenceSourceResponse",
+    "EvidenceSourceStatusUpdate",
     "ExperienceItem",
     "LanguageItem",
     "LinkItem",
