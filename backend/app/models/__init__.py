@@ -2,6 +2,7 @@ from app.db.session import Base
 from app.models.candidate_claim import CandidateClaim, ClaimOrigin, ClaimType
 from app.models.candidate_profile import CandidateProfile
 from app.models.candidate_target import CandidateTarget
+from app.models.evidence_item import EvidenceItem, EvidenceType
 from app.models.evidence_source import (
     AccessMode,
     EvidenceSource,
@@ -28,4 +29,6 @@ __all__ = [
     "EvidenceSourceType",
     "AccessMode",
     "EvidenceSourceStatus",
+    "EvidenceItem",
+    "EvidenceType",
 ]
