@@ -11,6 +11,7 @@ from app.models.evidence_source import (
 )
 from app.models.resume import Resume, ResumeStatus
 from app.models.resume_parse import ParseStatus, ResumeParse
+from app.models.skill import Skill
 from app.models.user import User
 from app.models.verification_result import (
     VerificationEvidence,
@@ -41,4 +42,5 @@ __all__ = [
     "VerificationEvidence",
     "VerificationType",
     "VerificationOutcome",
+    "Skill",
 ]

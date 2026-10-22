@@ -48,6 +48,12 @@ from app.schemas.resume_parse import (
     CanonicalResumeResponse,
     ResumeParseResponse,
 )
+from app.schemas.skill import (
+    SkillBase,
+    SkillCreate,
+    SkillResponse,
+    SkillUpdate,
+)
 from app.schemas.token import Token, TokenPayload
 from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
 from app.schemas.verification_result import (
@@ -92,6 +98,10 @@ __all__ = [
     "ResumeParseResponse",
     "ResumeResponse",
     "SkillCategory",
+    "SkillBase",
+    "SkillCreate",
+    "SkillUpdate",
+    "SkillResponse",
     "SummarySection",
     "Token",
     "TokenPayload",

@@ -6,6 +6,7 @@ from app.repositories.evidence_item import EvidenceItemRepository
 from app.repositories.evidence_source import EvidenceSourceRepository
 from app.repositories.resume import ResumeRepository
 from app.repositories.resume_parse import ResumeParseRepository
+from app.repositories.skill import SkillRepository
 from app.repositories.user import UserRepository
 from app.repositories.verification_result import VerificationResultRepository
 
@@ -20,4 +21,5 @@ __all__ = [
     "EvidenceSourceRepository",
     "EvidenceItemRepository",
     "VerificationResultRepository",
+    "SkillRepository",
 ]

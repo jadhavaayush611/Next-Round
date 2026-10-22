@@ -13,6 +13,12 @@ from app.services.extraction import (
 from app.services.parse_service import ResumeParseService
 from app.services.parser import SemanticResumeParser
 from app.services.resume import ResumeService
+from app.services.skill_service import (
+    AliasCollisionError,
+    AmbiguousSkillError,
+    SkillAlreadyExistsError,
+    SkillService,
+)
 from app.services.storage import BaseStorageService, LocalStorageService
 from app.services.user import UserService
 from app.services.verification_result_service import VerificationResultService
@@ -35,4 +41,8 @@ __all__ = [
     "SemanticResumeParser",
     "UserService",
     "VerificationResultService",
+    "SkillService",
+    "SkillAlreadyExistsError",
+    "AliasCollisionError",
+    "AmbiguousSkillError",
 ]

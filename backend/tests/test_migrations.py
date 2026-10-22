@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 
 
 def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
-    """Verifies that Alembic migrations up to 007_create_verification_results_table upgrade and downgrade cleanly."""
+    """Verifies that Alembic migrations up to 008_create_skills_table upgrade and downgrade cleanly."""
     backend_dir = Path(__file__).resolve().parent.parent
     ini_path = backend_dir / "alembic.ini"
     alembic_cfg = Config(str(ini_path))
@@ -31,35 +31,41 @@ def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
         conn.commit()
 
     with patch("app.config.settings.Settings.sqlalchemy_database_url", sqlite_url):
-        # 1. Upgrade to latest migration (head) -> runs 001 through 007
+        # 1. Upgrade to latest migration (head) -> runs 001 through 008
         command.upgrade(alembic_cfg, "head")
 
-        # 2. Downgrade 007 to 006
+        # 2. Downgrade 008 to 007
+        command.downgrade(alembic_cfg, "007_create_verification_results_table")
+
+        # 3. Upgrade back to head to verify re-application of 008
+        command.upgrade(alembic_cfg, "head")
+
+        # 4. Downgrade 008 and 007 to 006
         command.downgrade(alembic_cfg, "006_create_evidence_items_table")
 
-        # 3. Upgrade back to head to verify re-application of 007
+        # 5. Upgrade back to head to verify re-application of 007 and 008
         command.upgrade(alembic_cfg, "head")
 
-        # 4. Downgrade 007 and 006 to 005
+        # 6. Downgrade to 005
         command.downgrade(alembic_cfg, "005_create_evidence_sources_table")
 
-        # 5. Upgrade back to head to verify re-application of 006 and 007
+        # 7. Upgrade back to head
         command.upgrade(alembic_cfg, "head")
 
-        # 6. Downgrade to 004
+        # 8. Downgrade to 004
         command.downgrade(alembic_cfg, "004_create_candidate_profile_target_and_claims")
 
-        # 7. Upgrade back to head to verify re-application of 005, 006, 007
+        # 9. Upgrade back to head
         command.upgrade(alembic_cfg, "head")
 
-        # 8. Downgrade down to 003
+        # 10. Downgrade down to 003
         command.downgrade(alembic_cfg, "003_create_resume_parses_table")
 
-        # 9. Upgrade back to head to verify re-application of 004, 005, 006, 007
+        # 11. Upgrade back to head
         command.upgrade(alembic_cfg, "head")
 
-        # 10. Downgrade down to 002
+        # 12. Downgrade down to 002
         command.downgrade(alembic_cfg, "002_create_resumes_table")
 
-        # 11. Upgrade back to head to verify idempotent full chain upgrade
+        # 13. Upgrade back to head to verify idempotent full chain upgrade
         command.upgrade(alembic_cfg, "head")
