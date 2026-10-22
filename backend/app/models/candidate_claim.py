@@ -19,6 +19,7 @@ from app.db.session import Base
 if TYPE_CHECKING:
     from app.models.resume_parse import ResumeParse
     from app.models.user import User
+    from app.models.verification_result import VerificationResult
 
 
 class ClaimType(enum.StrEnum):
@@ -94,4 +95,7 @@ class CandidateClaim(Base):
     user: Mapped["User"] = relationship("User", back_populates="candidate_claims")
     resume_parse: Mapped["ResumeParse | None"] = relationship(
         "ResumeParse", back_populates="claims"
+    )
+    verification_results: Mapped[list["VerificationResult"]] = relationship(
+        "VerificationResult", back_populates="candidate_claim"
     )

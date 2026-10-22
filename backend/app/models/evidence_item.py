@@ -20,6 +20,7 @@ from app.db.session import Base
 
 if TYPE_CHECKING:
     from app.models.evidence_source import EvidenceSource
+    from app.models.verification_result import VerificationResult
 
 
 class EvidenceType(enum.StrEnum):
@@ -87,4 +88,10 @@ class EvidenceItem(Base):
     # Relationships
     evidence_source: Mapped["EvidenceSource"] = relationship(
         "EvidenceSource", back_populates="evidence_items"
+    )
+    verification_results: Mapped[list["VerificationResult"]] = relationship(
+        "VerificationResult",
+        secondary="verification_evidence",
+        back_populates="evidence_items",
+        passive_deletes="all",
     )

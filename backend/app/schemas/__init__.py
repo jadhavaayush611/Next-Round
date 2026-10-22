@@ -50,6 +50,11 @@ from app.schemas.resume_parse import (
 )
 from app.schemas.token import Token, TokenPayload
 from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
+from app.schemas.verification_result import (
+    VerificationResultBase,
+    VerificationResultCreate,
+    VerificationResultResponse,
+)
 
 __all__ = [
     "AdditionalSection",
@@ -95,4 +100,7 @@ __all__ = [
     "UserResponse",
     "UserUpdate",
     "VolunteeringItem",
+    "VerificationResultBase",
+    "VerificationResultCreate",
+    "VerificationResultResponse",
 ]

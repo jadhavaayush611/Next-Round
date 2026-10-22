@@ -15,6 +15,7 @@ from app.services.parser import SemanticResumeParser
 from app.services.resume import ResumeService
 from app.services.storage import BaseStorageService, LocalStorageService
 from app.services.user import UserService
+from app.services.verification_result_service import VerificationResultService
 
 __all__ = [
     "BaseStorageService",
@@ -33,4 +34,5 @@ __all__ = [
     "ResumeService",
     "SemanticResumeParser",
     "UserService",
+    "VerificationResultService",
 ]

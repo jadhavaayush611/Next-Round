@@ -12,6 +12,12 @@ from app.models.evidence_source import (
 from app.models.resume import Resume, ResumeStatus
 from app.models.resume_parse import ParseStatus, ResumeParse
 from app.models.user import User
+from app.models.verification_result import (
+    VerificationEvidence,
+    VerificationOutcome,
+    VerificationResult,
+    VerificationType,
+)
 
 __all__ = [
     "Base",
@@ -31,4 +37,8 @@ __all__ = [
     "EvidenceSourceStatus",
     "EvidenceItem",
     "EvidenceType",
+    "VerificationResult",
+    "VerificationEvidence",
+    "VerificationType",
+    "VerificationOutcome",
 ]
