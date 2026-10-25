@@ -17,6 +17,7 @@ from app.db.session import Base
 
 if TYPE_CHECKING:
     from app.models.candidate_profile import CandidateProfile
+    from app.models.role_requirement import RoleRequirement
 
 
 class CandidateTarget(Base):
@@ -56,4 +57,9 @@ class CandidateTarget(Base):
     # Relationships
     candidate_profile: Mapped["CandidateProfile"] = relationship(
         "CandidateProfile", back_populates="targets"
+    )
+    role_requirements: Mapped[list["RoleRequirement"]] = relationship(
+        "RoleRequirement",
+        back_populates="candidate_target",
+        order_by="RoleRequirement.created_at.asc()",
     )

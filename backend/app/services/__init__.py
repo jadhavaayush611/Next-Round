@@ -14,6 +14,7 @@ from app.services.extraction import (
 from app.services.parse_service import ResumeParseService
 from app.services.parser import SemanticResumeParser
 from app.services.resume import ResumeService
+from app.services.role_requirement_service import RoleRequirementService
 from app.services.skill_service import (
     AliasCollisionError,
     AmbiguousSkillError,
@@ -44,6 +45,7 @@ __all__ = [
     "UserService",
     "VerificationResultService",
     "SkillService",
+    "RoleRequirementService",
     "SkillAlreadyExistsError",
     "AliasCollisionError",
     "AmbiguousSkillError",

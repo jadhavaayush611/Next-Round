@@ -5,12 +5,22 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
+from app.models.role_requirement import (
+    RequirementImportance,
+    RequirementSourceType,
+    RequirementType,
+)
 from app.models.user import User
 from app.schemas.candidate_target import (
     CandidateTargetCreate,
     CandidateTargetResponse,
 )
+from app.schemas.role_requirement import (
+    RoleRequirementCreate,
+    RoleRequirementResponse,
+)
 from app.services.candidate_service import CandidateService
+from app.services.role_requirement_service import RoleRequirementService
 
 router = APIRouter()
 
@@ -99,3 +109,76 @@ def deactivate_candidate_target(
     """Deactivate target by ID."""
     service = CandidateService(db)
     return service.deactivate_target(current_user, target_id)
+
+
+# =============================================================================
+# Role Requirement Operations
+# =============================================================================
+
+
+@router.post(
+    "/{target_id}/requirements",
+    response_model=RoleRequirementResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create role requirement for target",
+    description="Creates a skill or qualification requirement tied to a specific candidate target.",
+)
+def create_target_requirement(
+    target_id: uuid.UUID,
+    requirement_in: RoleRequirementCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> RoleRequirementResponse:
+    """Create a role requirement for the specified target, enforcing candidate ownership."""
+    service = RoleRequirementService(db)
+    return service.create_requirement(current_user, target_id, requirement_in)
+
+
+@router.get(
+    "/{target_id}/requirements",
+    response_model=list[RoleRequirementResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List role requirements for target",
+    description="Lists all role requirements configured for a specific candidate target.",
+)
+def list_target_requirements(
+    target_id: uuid.UUID,
+    requirement_type: RequirementType | None = Query(
+        default=None, description="Filter by requirement type"
+    ),
+    importance: RequirementImportance | None = Query(
+        default=None, description="Filter by requirement importance"
+    ),
+    source_type: RequirementSourceType | None = Query(
+        default=None, description="Filter by source type"
+    ),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[RoleRequirementResponse]:
+    """List role requirements for the specified target, enforcing candidate ownership."""
+    service = RoleRequirementService(db)
+    return service.list_requirements(
+        current_user,
+        target_id,
+        requirement_type=requirement_type,
+        importance=importance,
+        source_type=source_type,
+    )
+
+
+@router.get(
+    "/{target_id}/requirements/{requirement_id}",
+    response_model=RoleRequirementResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get role requirement for target",
+    description="Retrieves a specific role requirement by ID for a target.",
+)
+def get_target_requirement(
+    target_id: uuid.UUID,
+    requirement_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> RoleRequirementResponse:
+    """Get single role requirement by ID."""
+    service = RoleRequirementService(db)
+    return service.get_requirement(current_user, target_id, requirement_id)
