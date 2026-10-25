@@ -1,6 +1,7 @@
 from app.db.session import Base
 from app.models.candidate_claim import CandidateClaim, ClaimOrigin, ClaimType
 from app.models.candidate_profile import CandidateProfile
+from app.models.candidate_skill import CandidateSkill, CandidateSkillEvidence
 from app.models.candidate_target import CandidateTarget
 from app.models.evidence_item import EvidenceItem, EvidenceType
 from app.models.evidence_source import (
@@ -43,4 +44,6 @@ __all__ = [
     "VerificationType",
     "VerificationOutcome",
     "Skill",
+    "CandidateSkill",
+    "CandidateSkillEvidence",
 ]

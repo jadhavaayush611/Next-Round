@@ -9,6 +9,14 @@ from app.schemas.candidate_profile import (
     CandidateProfileResponse,
     CandidateProfileUpdate,
 )
+from app.schemas.candidate_skill import (
+    CandidateSkillBase,
+    CandidateSkillCreate,
+    CandidateSkillEvidenceBase,
+    CandidateSkillEvidenceCreate,
+    CandidateSkillEvidenceResponse,
+    CandidateSkillResponse,
+)
 from app.schemas.candidate_target import (
     CandidateTargetBase,
     CandidateTargetCreate,
@@ -73,6 +81,12 @@ __all__ = [
     "CandidateProfileCreate",
     "CandidateProfileResponse",
     "CandidateProfileUpdate",
+    "CandidateSkillBase",
+    "CandidateSkillCreate",
+    "CandidateSkillEvidenceBase",
+    "CandidateSkillEvidenceCreate",
+    "CandidateSkillEvidenceResponse",
+    "CandidateSkillResponse",
     "CandidateTargetBase",
     "CandidateTargetCreate",
     "CandidateTargetResponse",

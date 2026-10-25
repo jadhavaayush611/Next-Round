@@ -4,6 +4,7 @@ from app.api.endpoints import (
     auth,
     candidate_claims,
     candidate_profiles,
+    candidate_skills,
     candidate_targets,
     evidence_sources,
     resumes,
@@ -43,6 +44,15 @@ api_router.include_router(
     candidate_claims.router,
     prefix="/candidate-profile/claims",
     tags=["candidate-claims"],
+    include_in_schema=False,
+)
+api_router.include_router(
+    candidate_skills.router, prefix="/candidate-skills", tags=["candidate-skills"]
+)
+api_router.include_router(
+    candidate_skills.router,
+    prefix="/candidate-profile/skills",
+    tags=["candidate-skills"],
     include_in_schema=False,
 )
 

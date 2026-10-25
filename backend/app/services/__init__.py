@@ -1,4 +1,5 @@
 from app.services.candidate_service import CandidateService
+from app.services.candidate_skill_service import CandidateSkillService
 from app.services.evidence_item_service import EvidenceItemService
 from app.services.evidence_source_service import EvidenceSourceService
 from app.services.extraction import (
@@ -26,6 +27,7 @@ from app.services.verification_result_service import VerificationResultService
 __all__ = [
     "BaseStorageService",
     "CandidateService",
+    "CandidateSkillService",
     "DocumentExtractionService",
     "EvidenceItemService",
     "EvidenceSourceService",

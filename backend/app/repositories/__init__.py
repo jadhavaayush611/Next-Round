@@ -1,6 +1,7 @@
 from app.repositories.base import BaseRepository
 from app.repositories.candidate_claim import CandidateClaimRepository
 from app.repositories.candidate_profile import CandidateProfileRepository
+from app.repositories.candidate_skill import CandidateSkillRepository
 from app.repositories.candidate_target import CandidateTargetRepository
 from app.repositories.evidence_item import EvidenceItemRepository
 from app.repositories.evidence_source import EvidenceSourceRepository
@@ -18,6 +19,7 @@ __all__ = [
     "CandidateProfileRepository",
     "CandidateTargetRepository",
     "CandidateClaimRepository",
+    "CandidateSkillRepository",
     "EvidenceSourceRepository",
     "EvidenceItemRepository",
     "VerificationResultRepository",
