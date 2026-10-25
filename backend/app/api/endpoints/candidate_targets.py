@@ -17,6 +17,7 @@ from app.schemas.candidate_target import (
 )
 from app.schemas.role_requirement import (
     RoleRequirementCreate,
+    RoleRequirementPreviewResponse,
     RoleRequirementResponse,
 )
 from app.services.candidate_service import CandidateService
@@ -164,6 +165,40 @@ def list_target_requirements(
         importance=importance,
         source_type=source_type,
     )
+
+
+@router.post(
+    "/{target_id}/requirements/preview",
+    response_model=RoleRequirementPreviewResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Preview parsed role requirements",
+    description="Parses the job description on the candidate target into structured requirement candidates without persistence side effects.",
+)
+def preview_target_requirements(
+    target_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> RoleRequirementPreviewResponse:
+    """Preview parsed role requirements for a candidate target without persisting."""
+    service = RoleRequirementService(db)
+    return service.preview_requirements(current_user, target_id)
+
+
+@router.get(
+    "/{target_id}/requirements/preview",
+    response_model=RoleRequirementPreviewResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Preview parsed role requirements (GET)",
+    description="Idempotent retrieval of parsed role requirements for a candidate target.",
+)
+def get_preview_target_requirements(
+    target_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> RoleRequirementPreviewResponse:
+    """Idempotent retrieval of parsed role requirements for a candidate target."""
+    service = RoleRequirementService(db)
+    return service.preview_requirements(current_user, target_id)
 
 
 @router.get(

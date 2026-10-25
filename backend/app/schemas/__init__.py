@@ -57,8 +57,10 @@ from app.schemas.resume_parse import (
     ResumeParseResponse,
 )
 from app.schemas.role_requirement import (
+    RequirementPreviewItem,
     RoleRequirementBase,
     RoleRequirementCreate,
+    RoleRequirementPreviewResponse,
     RoleRequirementResponse,
 )
 from app.schemas.skill import (
@@ -116,8 +118,10 @@ __all__ = [
     "ResumeListResponse",
     "ResumeParseResponse",
     "ResumeResponse",
+    "RequirementPreviewItem",
     "RoleRequirementBase",
     "RoleRequirementCreate",
+    "RoleRequirementPreviewResponse",
     "RoleRequirementResponse",
     "SkillCategory",
     "SkillBase",

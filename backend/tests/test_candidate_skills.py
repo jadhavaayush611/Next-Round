@@ -920,8 +920,7 @@ def test_postgresql_dialect_ddl_compilation() -> None:
 
     # Check partial unique indexes
     indexes_ddl = [
-        str(CreateIndex(idx).compile(dialect=pg_dialect))
-        for idx in cse_table.indexes
+        str(CreateIndex(idx).compile(dialect=pg_dialect)) for idx in cse_table.indexes
     ]
     claim_idx = [
         s for s in indexes_ddl if "uq_candidate_skill_evidence_skill_claim" in s

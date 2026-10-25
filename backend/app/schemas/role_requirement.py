@@ -45,3 +45,17 @@ class RoleRequirementResponse(RoleRequirementBase):
     id: uuid.UUID
     candidate_target_id: uuid.UUID
     created_at: datetime
+
+
+class RequirementPreviewItem(RoleRequirementBase):
+    """A requirement candidate extracted from a job description preview."""
+
+    matched_skill_name: str | None = None
+
+
+class RoleRequirementPreviewResponse(BaseModel):
+    """Preview response of extracted requirement candidates for a CandidateTarget."""
+
+    candidate_target_id: uuid.UUID
+    requirements: list[RequirementPreviewItem]
+    total_extracted: int
