@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.evidence_source import (
     AccessMode,
@@ -71,3 +71,22 @@ class EvidenceSourceResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class EvidenceCollectionResponse(BaseModel):
+    """
+    Validated response summarizing the outcome and observation counts of an
+    evidence collection run for an EvidenceSource.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    evidence_source_id: uuid.UUID
+    source_uri: str
+    access_status: EvidenceSourceStatus
+    items_collected: int
+    items_retained: int
+    total_items: int
+    collected_at: datetime
+    message: str
+    item_ids: list[uuid.UUID] = Field(default_factory=list)

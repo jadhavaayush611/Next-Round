@@ -8,13 +8,21 @@ from app.dependencies.auth import get_current_user
 from app.models.evidence_source import EvidenceSourceStatus, EvidenceSourceType
 from app.models.user import User
 from app.schemas.evidence_source import (
+    EvidenceCollectionResponse,
     EvidenceSourceCreate,
     EvidenceSourceResponse,
     EvidenceSourceStatusUpdate,
 )
 from app.services.evidence_source_service import EvidenceSourceService
+from app.services.github_client import GitHubClient
+from app.services.github_evidence_collector import GitHubEvidenceCollectorService
 
 router = APIRouter()
+
+
+def get_github_client() -> GitHubClient:
+    """Dependency provider for GitHub API client."""
+    return GitHubClient()
 
 
 @router.post(
@@ -108,3 +116,21 @@ def revoke_evidence_source(
     """Revoke authorization to an evidence source."""
     service = EvidenceSourceService(db)
     return service.revoke_source(current_user, source_id)
+
+
+@router.post(
+    "/{source_id}/collect",
+    response_model=EvidenceCollectionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Collect evidence from GitHub repository",
+    description="Collects repository metadata and README documentation observations from a registered public GitHub repository without mutating claims or generating verification conclusions.",
+)
+def collect_evidence_source(
+    source_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    github_client: GitHubClient = Depends(get_github_client),
+) -> EvidenceCollectionResponse:
+    """Collect evidence observations from a registered public GitHub repository."""
+    collector = GitHubEvidenceCollectorService(db, github_client=github_client)
+    return collector.collect_repository_evidence(current_user, source_id)

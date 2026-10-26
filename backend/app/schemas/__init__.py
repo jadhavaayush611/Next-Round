@@ -46,6 +46,7 @@ from app.schemas.evidence_item import (
     EvidenceItemResponse,
 )
 from app.schemas.evidence_source import (
+    EvidenceCollectionResponse,
     EvidenceSourceBase,
     EvidenceSourceCreate,
     EvidenceSourceResponse,
@@ -112,6 +113,7 @@ __all__ = [
     "EvidenceItemBase",
     "EvidenceItemCreate",
     "EvidenceItemResponse",
+    "EvidenceCollectionResponse",
     "EvidenceSourceBase",
     "EvidenceSourceCreate",
     "EvidenceSourceResponse",

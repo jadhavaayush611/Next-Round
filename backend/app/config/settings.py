@@ -66,6 +66,13 @@ class Settings(BaseSettings):
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ]
 
+    # GitHub Evidence Collection
+    GITHUB_API_BASE_URL: str = "https://api.github.com"
+    GITHUB_API_TOKEN: str | None = None
+    GITHUB_REQUEST_TIMEOUT_SECONDS: float = 10.0
+    GITHUB_MAX_README_BYTES: int = 32768  # 32 KB bounded README text extraction
+    GITHUB_MAX_RESPONSE_BYTES: int = 512 * 1024  # 512 KB bounded raw response body
+
     @model_validator(mode="after")
     def validate_production_jwt_secret(self) -> "Settings":
         if self.ENVIRONMENT == "production":
