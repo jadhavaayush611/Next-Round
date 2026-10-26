@@ -14,6 +14,7 @@ from app.services.extraction import (
 from app.services.parse_service import ResumeParseService
 from app.services.parser import SemanticResumeParser
 from app.services.resume import ResumeService
+from app.services.role_gap_analysis_service import RoleGapAnalysisService
 from app.services.role_requirement_parser import RoleRequirementParser
 from app.services.role_requirement_service import RoleRequirementService
 from app.services.skill_service import (
@@ -46,6 +47,7 @@ __all__ = [
     "UserService",
     "VerificationResultService",
     "SkillService",
+    "RoleGapAnalysisService",
     "RoleRequirementParser",
     "RoleRequirementService",
     "SkillAlreadyExistsError",
