@@ -11,7 +11,11 @@ from app.schemas.candidate_claim import (
     CandidateClaimCreate,
     CandidateClaimResponse,
 )
+from app.schemas.claim_evidence_match import ClaimEvidenceMatchResponse
 from app.services.candidate_service import CandidateService
+from app.services.claim_evidence_matching_service import (
+    ClaimEvidenceMatchingService,
+)
 
 router = APIRouter()
 
@@ -70,3 +74,30 @@ def get_candidate_claim(
     """Retrieve claim by ID."""
     service = CandidateService(db)
     return service.get_claim(current_user, claim_id)
+
+
+@router.get(
+    "/{claim_id}/evidence-matches",
+    response_model=ClaimEvidenceMatchResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Discover evidence matches for claim",
+    description=(
+        "Evaluates a candidate claim against candidate-owned evidence items to discover "
+        "potentially relevant observations. Deterministic and read-only: does not assert "
+        "authenticity, authorship, or proficiency."
+    ),
+)
+def get_claim_evidence_matches(
+    claim_id: uuid.UUID,
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+        description="Maximum number of evidence matches to return.",
+    ),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ClaimEvidenceMatchResponse:
+    """Discover potential evidence matches for a candidate claim."""
+    service = ClaimEvidenceMatchingService(db)
+    return service.find_evidence_matches(current_user, claim_id, limit=limit)

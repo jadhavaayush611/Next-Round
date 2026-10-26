@@ -1,3 +1,6 @@
+import re
+
+
 def normalize_skill_name(name: str | None) -> str:
     """
     Deterministic normalization for skill matching, lookup, and collision detection.
@@ -47,3 +50,41 @@ def clean_aliases(
         cleaned.append(collapsed)
 
     return cleaned
+
+
+def build_skill_pattern(term: str) -> re.Pattern[str]:
+    """
+    Build a regex pattern for matching a skill term respecting technical punctuation boundaries.
+    Supports:
+    - Trailing punctuation: 'C++', 'C#'
+    - Leading punctuation: '.NET'
+    - Internal punctuation: 'Node.js', 'CI/CD', 'scikit-learn'
+    - Multi-word terms with variable internal whitespace: 'Ruby on Rails'
+    - Single-letter skills: 'C' avoiding false positive in 'C++' or 'C#'
+    """
+    term_clean = term.strip()
+    parts = [re.escape(w) for w in term_clean.split()]
+    escaped_term = r"\s+".join(parts)
+
+    # Left boundary
+    if term_clean and re.match(r"[a-zA-Z0-9_]", term_clean[0]):
+        left = r"(?<![a-zA-Z0-9_])"
+    else:
+        left = r"(?<![a-zA-Z0-9_\.])"
+
+    # Right boundary
+    if term_clean.lower() == "react":
+        right = r"(?![a-zA-Z0-9_])(?!\s+native\b)"
+    elif term_clean.endswith("++"):
+        right = r"(?!\+)"
+    elif term_clean.endswith("#"):
+        right = r"(?!#)"
+    elif term_clean and re.match(r"[a-zA-Z0-9_]", term_clean[-1]):
+        if len(term_clean) == 1 and term_clean.isalpha():
+            right = r"(?![a-zA-Z0-9_+#])"
+        else:
+            right = r"(?![a-zA-Z0-9_])"
+    else:
+        right = r"(?![a-zA-Z0-9_+#])"
+
+    return re.compile(left + escaped_term + right, re.IGNORECASE)

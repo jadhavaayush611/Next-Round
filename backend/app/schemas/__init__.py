@@ -40,6 +40,12 @@ from app.schemas.canonical_resume import (
     SummarySection,
     VolunteeringItem,
 )
+from app.schemas.claim_evidence_match import (
+    ClaimEvidenceMatchResponse,
+    ClaimMatchStatus,
+    EvidenceMatchItem,
+    MatchingBasis,
+)
 from app.schemas.evidence_item import (
     EvidenceItemBase,
     EvidenceItemCreate,
@@ -91,6 +97,8 @@ __all__ = [
     "CandidateClaimBase",
     "CandidateClaimCreate",
     "CandidateClaimResponse",
+    "ClaimEvidenceMatchResponse",
+    "ClaimMatchStatus",
     "CandidateIdentity",
     "CandidateProfileBase",
     "CandidateProfileCreate",
@@ -113,6 +121,7 @@ __all__ = [
     "EvidenceItemBase",
     "EvidenceItemCreate",
     "EvidenceItemResponse",
+    "EvidenceMatchItem",
     "EvidenceCollectionResponse",
     "EvidenceSourceBase",
     "EvidenceSourceCreate",
@@ -122,6 +131,7 @@ __all__ = [
     "GapAnalysisStatus",
     "LanguageItem",
     "LinkItem",
+    "MatchingBasis",
     "OrganizationItem",
     "ProjectItem",
     "PublicationItem",
