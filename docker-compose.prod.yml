@@ -30,6 +30,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
       - ENVIRONMENT=production
+      - STORAGE_LOCAL_ROOT=/app/uploads
+    volumes:
+      - resume_uploads_prod:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -50,4 +53,6 @@ services:
 
 volumes:
   postgres_data_prod:
+    driver: local
+  resume_uploads_prod:
     driver: local

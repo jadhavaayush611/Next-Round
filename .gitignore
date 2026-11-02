@@ -72,5 +72,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # NextRound specific temporary uploads/cache
+uploads/
 backend/uploads/
 backend/temp/

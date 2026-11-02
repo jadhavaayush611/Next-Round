@@ -162,16 +162,83 @@ erDiagram
 
 ## 4. Key Engines and Algorithms
 
-### 4.1 Resume Upload & Parsing Engine
-1. **Document Ingestion**: Backend ingests `.pdf` and `.docx` files.
-2. **Text Extraction**: Uses `pdfplumber` for precise character coordinate extractions and tabular data capture (important for education history extraction). Falls back to `PyPDF2` or `python-docx` depending on the extension.
-3. **NLP Section Classification**: Rules combined with spaCy NLP identify section boundaries (e.g., separating "Projects" from "Experience").
-4. **Skill & Tech Stack Harvesting**: Runs text through custom spaCy NER models and regular expression mapping layers to categorize languages, frameworks, databases, and DevOps tools.
+### 4.1 Secure Resume Upload & Storage Pipeline
+1. **Document Ingestion**: Backend accepts `.pdf` and `.docx` files via `POST /api/v1/resumes`.
+2. **Intentional Security Boundary (Phase 2.2 vs Phase 2.3)**: 
+   - **Untrusted Client Metadata**: Client-supplied `Content-Type` and `filename` are treated as untrusted inputs.
+   - **Phase 2.2 Lightweight Checks**: Combines case-insensitive extension whitelist (`.pdf`, `.docx`), MIME type consistency, and lightweight magic-byte signature validation (`%PDF-` for PDF, `PK` ZIP archive header for DOCX).
+   - **Phase 2.3 Scope Boundary**: Full structural validation (PDF object tree inspection, DOCX OpenXML DOM verification, text extraction) belongs strictly to Phase 2.3.
+3. **Upload Size Enforcement**:
+   - Starlette / FastAPI multipart parser receives the incoming multipart stream into a managed temporary buffer (`UploadFile`).
+   - The permanent storage persistence limit (default 5 MB, configurable via `MAX_UPLOAD_SIZE_BYTES`) is actively enforced during the chunked copy into permanent storage.
+   - If the incoming stream exceeds the limit, chunked copying terminates immediately, partial disk files are unlinked, and an HTTP `413 Payload Too Large` is returned, guaranteeing oversized uploads are never permanently stored.
+4. **Storage Abstraction Layer**:
+   - Resumes are stored using safe storage keys (`users/{user_id}/resumes/{resume_id}.{ext}`) where the filename is generated from the Resume UUID, never user-controlled filenames.
+   - All filesystem operations are decoupled behind `BaseStorageService` and implemented via `LocalStorageService` with configurable root (`STORAGE_LOCAL_ROOT`).
+   - Clean boundary for future replacement with object storage (e.g., S3/GCS/MinIO).
+5. **Transactional Integrity & Rollback**:
+   - If database persistence or commits fail after saving the file to storage, the database transaction is rolled back and the physical file is immediately purged to eliminate orphaned storage artifacts.
 
 ```mermaid
 flowchart TD
-    File[Upload Resume] --> Extract[Extract Text via pdfplumber]
-    Extract --> Sections[Parse Sections: Education, Skills, Projects, etc.]
+    Client[Client / Frontend] -->|POST /api/v1/resumes| Endpoint[FastAPI Resume Endpoint]
+    Endpoint -->|Authenticate JWT| Auth[User Auth Dependency]
+    Endpoint -->|Delegate Upload| Service[Resume Service]
+    Service -->|Extension, MIME, Magic Sig, Limit| Validator[Validation Layer]
+    Service -->|Save Chunks with Cap| Storage[Storage Abstraction]
+    Storage -->|Write users/:uid/resumes/:rid.ext| LocalFS[Local Filesystem Storage]
+    Service -->|Create Record version=N+1 status=UPLOADED| DB[(PostgreSQL Database)]
+    Service -->|On Failure: Purge File| Cleanup[Storage Cleanup Handler]
+```
+
+### 4.2 Document Text Extraction Layer (Phase 2.3)
+Converts stored binary resumes into normalized, deterministic plain text without semantic interpretation.
+
+```mermaid
+flowchart TD
+    Resume[Resume Metadata / storage_key] --> Storage[BaseStorageService / LocalStorageService]
+    Storage --> TrustedPath[Resolved Trusted Local File Path]
+    TrustedPath --> Registry[Extractor Registry]
+    Registry -->|application/pdf| PDFExt[PDF Extractor - pdfplumber]
+    Registry -->|docx MIME| DOCXExt[DOCX Extractor - python-docx]
+    PDFExt --> Normalizer[Text Normalizer]
+    DOCXExt --> Normalizer
+    Normalizer --> Result[ExtractionResult: text, status, extraction_issues, char_count, extractor_type]
+```
+
+#### Extraction Status & Issue Semantics:
+The extraction contract models document processing outcomes with three explicit statuses and fine-grained issue tracking:
+- **`COMPLETE`**:
+  - All relevant document portions (pages/paragraphs/tables) were processed successfully without errors.
+  - May yield non-empty text (or multi-page content with textless pages such as diagrams/images if no parser error occurred).
+  - `extraction_issues` is guaranteed to be empty (`[]`).
+- **`EMPTY`**:
+  - Document is valid and was fully processed without error, but contains zero extractable text (e.g., scanned/image-only PDFs, blank DOCX files).
+  - `extraction_issues` is guaranteed to be empty (`[]`).
+  - OCR is intentionally not performed in this phase.
+- **`PARTIAL`**:
+  - The document is processable and some content was successfully extracted, but one or more isolated portions (specific page or table/paragraph element) encountered an extraction error.
+  - Successfully extracted text from healthy portions is preserved and returned.
+  - `extraction_issues` contains structured `ExtractionIssue(location_type, location, reason)` entries pinpointing failed elements (e.g., `location_type="page", location=2` or `location_type="table", location=1`).
+- **`DocumentContentError`**:
+  - Raised when a document cannot be meaningfully processed at all (e.g. corrupt zip archive, unparseable PDF catalog/streams, or 100% of body elements failing). Partial results are never manufactured for completely unreadable files.
+
+#### Architectural Boundaries:
+- **Phase 2.3 (Document $\rightarrow$ Plain Text)**:
+  - Strict conversion of `.pdf` and `.docx` binary containers into plain text.
+  - Page order and natural document reading order (paragraphs and tables) are preserved.
+  - Text normalization enforces NFKC unicode cleanup, CRLF $\rightarrow$ LF, whitespace trimming, and consecutive newline compaction while preserving technical tokens (`C++`, `C#`, `.NET`, `Node.js`, `SQL`, URLs, emails).
+  - Corrupt or unreadable documents raise controlled application exceptions (`DocumentReadError`, `DocumentContentError`).
+- **Phase 2.4 (Plain Text $\rightarrow$ Structured Resume Data)**:
+  - Section classification (Education, Experience, Skills), spaCy NLP parsing, and entity harvesting occur in Phase 2.4 downstream from normalized text output.
+
+### 4.3 Resume Parsing Engine (Phase 2.4+)
+1. **NLP Section Classification**: Rules combined with spaCy NLP identify section boundaries (e.g., separating "Projects" from "Experience").
+2. **Skill & Tech Stack Harvesting**: Runs text through custom spaCy NER models and regular expression mapping layers to categorize languages, frameworks, databases, and DevOps tools.
+
+```mermaid
+flowchart TD
+    Result[ExtractionResult Normalized Text] --> Sections[Parse Sections: Education, Skills, Projects, etc.]
     Sections --> spaCy[spaCy NLP Entity Recognizer]
     Sections --> Regex[Regex Phrase Dictionary Matcher]
     spaCy --> EntityCombine[Aggregate & Categorize Skills]
@@ -179,7 +246,7 @@ flowchart TD
     EntityCombine --> ParsedResult[Structured JSON Resume Output]
 ```
 
-### 4.2 ATS Scoring Engine
+### 4.4 ATS Scoring Engine
 Generates a score out of 100 based on standard industry filters:
 * **Formatting (20%)**: Checks for single-page layout compatibility, clear standard headings, and absence of complex non-parseable structures (e.g., complex multi-column tables, vector graphics, image-based pages).
 * **Content Completeness (20%)**: Verifies presence of contact details, education history, projects, and skills.

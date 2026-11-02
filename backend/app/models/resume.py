@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 if TYPE_CHECKING:
+    from app.models.resume_parse import ResumeParse
     from app.models.user import User
 
 
@@ -70,3 +71,9 @@ class Resume(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="resumes")
+    parses: Mapped[list["ResumeParse"]] = relationship(
+        "ResumeParse",
+        back_populates="resume",
+        cascade="all, delete-orphan",
+        order_by="ResumeParse.created_at.desc()",
+    )
