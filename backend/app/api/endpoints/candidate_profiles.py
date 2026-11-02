@@ -1,17 +1,60 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
+from app.schemas.candidate_intelligence import (
+    CandidateIntelligenceOverviewResponse,
+)
 from app.schemas.candidate_profile import (
     CandidateProfileCreate,
     CandidateProfileResponse,
     CandidateProfileUpdate,
 )
+from app.services.candidate_intelligence_service import (
+    CandidateIntelligenceService,
+)
 from app.services.candidate_service import CandidateService
 
 router = APIRouter()
+
+
+@router.get(
+    "/intelligence-overview",
+    response_model=CandidateIntelligenceOverviewResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get candidate intelligence overview",
+    description="Integrates candidate profile context, active target alignment, evidence-backed skill coverage, resume provenance, and connected evidence sources into a consolidated, deterministic read-only view.",
+)
+def get_candidate_intelligence_overview(
+    freshness_threshold_days: int | None = Query(
+        default=None,
+        ge=1,
+        description="Optional freshness threshold in days to flag observations older than threshold",
+    ),
+    skills_preview_limit: int = Query(
+        default=10,
+        ge=1,
+        le=50,
+        description="Maximum number of skills to include in the preview slice",
+    ),
+    skills_preview_offset: int = Query(
+        default=0,
+        ge=0,
+        description="Offset for the skills preview slice",
+    ),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CandidateIntelligenceOverviewResponse:
+    """Fetch consolidated, candidate-scoped intelligence overview."""
+    service = CandidateIntelligenceService(db)
+    return service.get_intelligence_overview(
+        user=current_user,
+        freshness_threshold_days=freshness_threshold_days,
+        skills_preview_limit=skills_preview_limit,
+        skills_preview_offset=skills_preview_offset,
+    )
 
 
 @router.get(

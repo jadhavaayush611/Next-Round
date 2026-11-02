@@ -1,3 +1,6 @@
+from app.services.candidate_intelligence_service import (
+    CandidateIntelligenceService,
+)
 from app.services.candidate_service import CandidateService
 from app.services.candidate_skill_coverage_service import (
     CandidateSkillCoverageService,
@@ -33,6 +36,7 @@ from app.services.verification_result_service import VerificationResultService
 
 __all__ = [
     "BaseStorageService",
+    "CandidateIntelligenceService",
     "CandidateService",
     "CandidateSkillCoverageService",
     "CandidateSkillService",
