@@ -1,4 +1,7 @@
 from app.services.candidate_service import CandidateService
+from app.services.candidate_skill_coverage_service import (
+    CandidateSkillCoverageService,
+)
 from app.services.candidate_skill_service import CandidateSkillService
 from app.services.claim_evidence_matching_service import ClaimEvidenceMatchingService
 from app.services.evidence_item_service import EvidenceItemService
@@ -31,6 +34,7 @@ from app.services.verification_result_service import VerificationResultService
 __all__ = [
     "BaseStorageService",
     "CandidateService",
+    "CandidateSkillCoverageService",
     "CandidateSkillService",
     "ClaimEvidenceMatchingService",
     "DocumentExtractionService",
