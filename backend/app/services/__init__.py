@@ -1,3 +1,12 @@
+from app.services.assessment_catalog_service import (
+    AssessmentCatalogError,
+    AssessmentCatalogService,
+    AssessmentImmutableError,
+    AssessmentNotFoundError,
+    AssessmentValidationError,
+    RubricNotFoundError,
+    TaskNotFoundError,
+)
 from app.services.candidate_intelligence_service import (
     CandidateIntelligenceService,
 )
@@ -7,6 +16,15 @@ from app.services.candidate_skill_coverage_service import (
 )
 from app.services.candidate_skill_service import CandidateSkillService
 from app.services.claim_evidence_matching_service import ClaimEvidenceMatchingService
+from app.services.competency_service import (
+    CompetencyAlreadyExistsError,
+    CompetencyNotFoundError,
+    CompetencyService,
+    CompetencyServiceError,
+    CompetencyValidationError,
+    SkillNameCollisionError,
+    SkillNotFoundError,
+)
 from app.services.evidence_item_service import EvidenceItemService
 from app.services.evidence_source_service import EvidenceSourceService
 from app.services.extraction import (
@@ -35,12 +53,24 @@ from app.services.user import UserService
 from app.services.verification_result_service import VerificationResultService
 
 __all__ = [
+    "AliasCollisionError",
+    "AmbiguousSkillError",
+    "AssessmentCatalogError",
+    "AssessmentCatalogService",
+    "AssessmentImmutableError",
+    "AssessmentNotFoundError",
+    "AssessmentValidationError",
     "BaseStorageService",
     "CandidateIntelligenceService",
     "CandidateService",
     "CandidateSkillCoverageService",
     "CandidateSkillService",
     "ClaimEvidenceMatchingService",
+    "CompetencyAlreadyExistsError",
+    "CompetencyNotFoundError",
+    "CompetencyService",
+    "CompetencyServiceError",
+    "CompetencyValidationError",
     "DocumentExtractionService",
     "EvidenceItemService",
     "EvidenceSourceService",
@@ -53,14 +83,16 @@ __all__ = [
     "Provenance",
     "ResumeParseService",
     "ResumeService",
-    "SemanticResumeParser",
-    "UserService",
-    "VerificationResultService",
-    "SkillService",
     "RoleGapAnalysisService",
     "RoleRequirementParser",
     "RoleRequirementService",
+    "RubricNotFoundError",
+    "SemanticResumeParser",
     "SkillAlreadyExistsError",
-    "AliasCollisionError",
-    "AmbiguousSkillError",
+    "SkillNameCollisionError",
+    "SkillNotFoundError",
+    "SkillService",
+    "TaskNotFoundError",
+    "UserService",
+    "VerificationResultService",
 ]

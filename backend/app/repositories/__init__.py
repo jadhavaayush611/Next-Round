@@ -1,8 +1,12 @@
+from app.repositories.assessment_definition import AssessmentDefinitionRepository
+from app.repositories.assessment_task import AssessmentTaskRepository
 from app.repositories.base import BaseRepository
 from app.repositories.candidate_claim import CandidateClaimRepository
 from app.repositories.candidate_profile import CandidateProfileRepository
 from app.repositories.candidate_skill import CandidateSkillRepository
 from app.repositories.candidate_target import CandidateTargetRepository
+from app.repositories.competency import CompetencyRepository
+from app.repositories.evaluation_rubric import EvaluationRubricRepository
 from app.repositories.evidence_item import EvidenceItemRepository
 from app.repositories.evidence_source import EvidenceSourceRepository
 from app.repositories.resume import ResumeRepository
@@ -26,4 +30,8 @@ __all__ = [
     "VerificationResultRepository",
     "SkillRepository",
     "RoleRequirementRepository",
+    "CompetencyRepository",
+    "AssessmentDefinitionRepository",
+    "AssessmentTaskRepository",
+    "EvaluationRubricRepository",
 ]

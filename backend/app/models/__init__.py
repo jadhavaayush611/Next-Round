@@ -1,8 +1,17 @@
 from app.db.session import Base
+from app.models.assessment_definition import (
+    AssessmentDefinition,
+    AssessmentDifficulty,
+    AssessmentStatus,
+    AssessmentType,
+)
+from app.models.assessment_task import AssessmentTask, TaskType
 from app.models.candidate_claim import CandidateClaim, ClaimOrigin, ClaimType
 from app.models.candidate_profile import CandidateProfile
 from app.models.candidate_skill import CandidateSkill, CandidateSkillEvidence
 from app.models.candidate_target import CandidateTarget
+from app.models.competency import Competency, CompetencyDimension
+from app.models.evaluation_rubric import EvaluationMode, EvaluationRubric
 from app.models.evidence_item import EvidenceItem, EvidenceType
 from app.models.evidence_source import (
     AccessMode,
@@ -56,4 +65,14 @@ __all__ = [
     "RequirementType",
     "RequirementImportance",
     "RequirementSourceType",
+    "Competency",
+    "CompetencyDimension",
+    "AssessmentDefinition",
+    "AssessmentType",
+    "AssessmentDifficulty",
+    "AssessmentStatus",
+    "AssessmentTask",
+    "TaskType",
+    "EvaluationRubric",
+    "EvaluationMode",
 ]
