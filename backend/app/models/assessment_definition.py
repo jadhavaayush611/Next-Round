@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 if TYPE_CHECKING:
+    from app.models.assessment_attempt import AssessmentAttempt
     from app.models.assessment_task import AssessmentTask
 
 
@@ -128,4 +129,9 @@ class AssessmentDefinition(Base):
         back_populates="assessment_definition",
         cascade="all, delete-orphan",
         order_by="AssessmentTask.order_index",
+    )
+    attempts: Mapped[list["AssessmentAttempt"]] = relationship(
+        "AssessmentAttempt",
+        back_populates="assessment_definition",
+        cascade="all, delete-orphan",
     )

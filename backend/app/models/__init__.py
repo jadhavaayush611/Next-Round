@@ -1,4 +1,5 @@
 from app.db.session import Base
+from app.models.assessment_attempt import AssessmentAttempt, AttemptStatus
 from app.models.assessment_definition import (
     AssessmentDefinition,
     AssessmentDifficulty,
@@ -28,6 +29,7 @@ from app.models.role_requirement import (
     RoleRequirement,
 )
 from app.models.skill import Skill
+from app.models.task_submission import TaskSubmission, TaskSubmissionStatus
 from app.models.user import User
 from app.models.verification_result import (
     VerificationEvidence,
@@ -75,4 +77,8 @@ __all__ = [
     "TaskType",
     "EvaluationRubric",
     "EvaluationMode",
+    "AssessmentAttempt",
+    "AttemptStatus",
+    "TaskSubmission",
+    "TaskSubmissionStatus",
 ]

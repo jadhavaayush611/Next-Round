@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 
 
 def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
-    """Verifies that Alembic migrations up to 011_create_competencies_and_assessments_tables upgrade and downgrade cleanly."""
+    """Verifies that Alembic migrations up to 012_create_assessment_attempts_and_submissions_tables upgrade and downgrade cleanly."""
     backend_dir = Path(__file__).resolve().parent.parent
     ini_path = backend_dir / "alembic.ini"
     alembic_cfg = Config(str(ini_path))
@@ -31,13 +31,19 @@ def test_alembic_migrations_upgrade_and_downgrade(tmp_path: Path) -> None:
         conn.commit()
 
     with patch("app.config.settings.Settings.sqlalchemy_database_url", sqlite_url):
-        # 1. Upgrade to latest migration (head) -> runs 001 through 011
+        # 1. Upgrade to latest migration (head) -> runs 001 through 012
         command.upgrade(alembic_cfg, "head")
 
-        # 2. Downgrade 011 to 010
+        # 2. Downgrade 012 to 011
+        command.downgrade(alembic_cfg, "011_create_competencies_and_assessments_tables")
+
+        # 3. Upgrade back to head to verify re-application of 012
+        command.upgrade(alembic_cfg, "head")
+
+        # 4. Downgrade 012 and 011 to 010
         command.downgrade(alembic_cfg, "010_create_role_requirements_table")
 
-        # 3. Upgrade back to head to verify re-application of 011
+        # 5. Upgrade back to head to verify re-application of 011 and 012
         command.upgrade(alembic_cfg, "head")
 
         # 4. Downgrade 011 and 010 to 009

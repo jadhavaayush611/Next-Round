@@ -52,6 +52,11 @@ class AssessmentTask(Base):
     __tablename__ = "assessment_tasks"
     __table_args__ = (
         UniqueConstraint(
+            "id",
+            "assessment_definition_id",
+            name="uq_assessment_tasks_id_def_id",
+        ),
+        UniqueConstraint(
             "assessment_definition_id",
             "identifier",
             name="uq_assessment_tasks_definition_identifier",

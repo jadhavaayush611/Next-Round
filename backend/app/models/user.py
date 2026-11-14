@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 if TYPE_CHECKING:
+    from app.models.assessment_attempt import AssessmentAttempt
     from app.models.candidate_claim import CandidateClaim
     from app.models.candidate_profile import CandidateProfile
     from app.models.candidate_skill import CandidateSkill
@@ -59,6 +60,11 @@ class User(Base):
     )
     candidate_skills: Mapped[list["CandidateSkill"]] = relationship(
         "CandidateSkill",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    assessment_attempts: Mapped[list["AssessmentAttempt"]] = relationship(
+        "AssessmentAttempt",
         back_populates="user",
         cascade="all, delete-orphan",
     )

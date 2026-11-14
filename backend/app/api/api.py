@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.endpoints import (
+    assessment_attempts,
     assessments,
     auth,
     candidate_claims,
@@ -60,6 +61,11 @@ api_router.include_router(
 # Evidence Source Foundation
 api_router.include_router(
     evidence_sources.router, prefix="/evidence-sources", tags=["evidence-sources"]
+)
+
+# Assessment Attempt Foundation (Mounted BEFORE assessments to prevent route shadowing)
+api_router.include_router(
+    assessment_attempts.router, prefix="/assessments", tags=["assessment-attempts"]
 )
 
 # Assessment Catalog Foundation

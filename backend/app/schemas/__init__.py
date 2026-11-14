@@ -133,6 +133,21 @@ from app.schemas.skill import (
     SkillResponse,
     SkillUpdate,
 )
+from app.schemas.task_submission import (
+    MAX_AGGREGATE_PAYLOAD_BYTES,
+    MAX_SUBMISSION_PAYLOAD_BYTES,
+    AssessmentAttemptListResponse,
+    AssessmentAttemptResponse,
+    CodeAnalysisSubmissionPayload,
+    CodingSubmissionPayload,
+    FreeResponseSubmissionPayload,
+    MultipleChoiceSubmissionPayload,
+    TaskSubmissionResponse,
+    TaskSubmissionSaveRequest,
+    calculate_payload_bytes,
+    canonical_json_dumps,
+    validate_submission_payload,
+)
 from app.schemas.token import Token, TokenPayload
 from app.schemas.user import UserBase, UserCreate, UserResponse, UserUpdate
 from app.schemas.verification_result import (
@@ -143,6 +158,8 @@ from app.schemas.verification_result import (
 
 __all__ = [
     "AdditionalSection",
+    "AssessmentAttemptListResponse",
+    "AssessmentAttemptResponse",
     "AssessmentCatalogItemResponse",
     "AssessmentDefinitionCreate",
     "AssessmentDefinitionUpdate",
@@ -187,6 +204,8 @@ __all__ = [
     "ClaimMatchStatus",
     "ClaimProvenance",
     "ClaimScopeOutcome",
+    "CodeAnalysisSubmissionPayload",
+    "CodingSubmissionPayload",
     "CompetencyBase",
     "CompetencyCreate",
     "CompetencyResponse",
@@ -208,10 +227,14 @@ __all__ = [
     "EvidenceSourcesOverview",
     "EvidenceSourceStatusUpdate",
     "ExperienceItem",
+    "FreeResponseSubmissionPayload",
     "GapAnalysisStatus",
     "LanguageItem",
     "LinkItem",
     "MatchingBasis",
+    "MAX_AGGREGATE_PAYLOAD_BYTES",
+    "MAX_SUBMISSION_PAYLOAD_BYTES",
+    "MultipleChoiceSubmissionPayload",
     "OrganizationItem",
     "ProfileSummary",
     "ProjectItem",
@@ -244,6 +267,8 @@ __all__ = [
     "TargetAlignmentOverview",
     "TargetRequirementAlignmentItem",
     "TargetSummary",
+    "TaskSubmissionResponse",
+    "TaskSubmissionSaveRequest",
     "Token",
     "TokenPayload",
     "UnassociatedSkillClaimDetail",
@@ -255,4 +280,7 @@ __all__ = [
     "VerificationResultBase",
     "VerificationResultCreate",
     "VerificationResultResponse",
+    "calculate_payload_bytes",
+    "canonical_json_dumps",
+    "validate_submission_payload",
 ]

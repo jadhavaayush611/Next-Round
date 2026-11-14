@@ -1,3 +1,4 @@
+from app.repositories.assessment_attempt import AssessmentAttemptRepository
 from app.repositories.assessment_definition import AssessmentDefinitionRepository
 from app.repositories.assessment_task import AssessmentTaskRepository
 from app.repositories.base import BaseRepository
@@ -13,6 +14,7 @@ from app.repositories.resume import ResumeRepository
 from app.repositories.resume_parse import ResumeParseRepository
 from app.repositories.role_requirement import RoleRequirementRepository
 from app.repositories.skill import SkillRepository
+from app.repositories.task_submission import TaskSubmissionRepository
 from app.repositories.user import UserRepository
 from app.repositories.verification_result import VerificationResultRepository
 
@@ -34,4 +36,6 @@ __all__ = [
     "AssessmentDefinitionRepository",
     "AssessmentTaskRepository",
     "EvaluationRubricRepository",
+    "AssessmentAttemptRepository",
+    "TaskSubmissionRepository",
 ]
